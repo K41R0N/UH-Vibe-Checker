@@ -1,4 +1,5 @@
 import { City } from '../types/city';
+import { DataService } from './api/dataService';
 
 // PLACEHOLDER: Mock data for development - Replace with database fetch
 const MOCK_CITIES: City[] = [
@@ -52,14 +53,29 @@ const MOCK_CITIES: City[] = [
   }
 ];
 
+const dataService = new DataService();
+
 // PLACEHOLDER: Replace with database queries
 export const getCities = async (): Promise<City[]> => {
   return MOCK_CITIES;
 };
 
-export const getCityBySlug = async (slug: string): Promise<City | null> => {
-  return MOCK_CITIES.find(city => city.slug === slug) || null;
-};
+export async function getCityBySlug(slug: string) {
+  try {
+    const cityName = slug.replace(/-/g, ' ');
+    const cityData = await dataService.getCityData(cityName);
+    
+    return {
+      id: slug,
+      name: cityName,
+      slug: slug,
+      ...cityData
+    };
+  } catch (error) {
+    console.error('Error fetching city data:', error);
+    return null;
+  }
+}
 
 export const generateStaticPaths = async () => {
   return MOCK_CITIES.map(city => ({
