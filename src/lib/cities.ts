@@ -1,84 +1,86 @@
 import { City } from '../types/city';
 import { DataService } from './api/dataService';
-
-// PLACEHOLDER: Mock data for development - Replace with database fetch
-const MOCK_CITIES: City[] = [
-  {
-    id: '1', // PLACEHOLDER: Will be replaced with database-generated ID
-    name: 'Barcelona',
-    country: 'Spain',
-    slug: 'barcelona',
-    costOfLiving: {
-      // PLACEHOLDER: Sample costs - Replace with real data from API/Database
-      housing: 1200,
-      food: 400,
-      transportation: 50,
-      utilities: 150
-    },
-    qualityOfLife: {
-      // PLACEHOLDER: Sample scores - Replace with real data from API/Database
-      safety: 8.5,
-      healthcare: 9.0,
-      climate: 'Mediterranean'
-    },
-    metadata: {
-      // PLACEHOLDER: Sample SEO data - Replace with dynamic generation
-      title: 'Living in Barcelona - City Guide',
-      description: 'Complete guide to living in Barcelona, Spain',
-      keywords: ['barcelona', 'spain', 'cost of living', 'expat']
-    }
-  },
-  // PLACEHOLDER: Additional test city
-  {
-    id: '2',
-    name: 'Lisbon',
-    slug: 'lisbon',
-    country: 'Portugal',
-    costOfLiving: {
-      housing: 1000,
-      food: 350,
-      transportation: 40,
-      utilities: 120
-    },
-    qualityOfLife: {
-      safety: 9.0,
-      healthcare: 8.5,
-      climate: 'Mediterranean'
-    },
-    metadata: {
-      title: 'Living in Lisbon - Digital Nomad Guide',
-      description: 'Everything you need to know about living in Lisbon as an expat or digital nomad.',
-      keywords: ['lisbon', 'digital nomad', 'expat', 'portugal']
-    }
-  }
-];
+import { cityDatabase, getAllCities } from './data/cityDatabase';
 
 const dataService = new DataService();
 
-// PLACEHOLDER: Replace with database queries
 export const getCities = async (): Promise<City[]> => {
-  return MOCK_CITIES;
+  const cities = await Promise.allSettled(
+    getAllCities().map(async (cityInfo) => {
+      try {
+        const cityData = await dataService.getCityData(cityInfo.name);
+        return {
+          ...cityData,
+          name: cityInfo.name,
+          country: cityInfo.country,
+          countryCode: cityInfo.countryCode,
+          slug: cityInfo.name.toLowerCase(),
+          description: cityInfo.description,
+          metadata: {
+            title: `Living in ${cityInfo.name}, ${cityInfo.country} - Digital Nomad Guide`,
+            description: `Comprehensive guide to living in ${cityInfo.name}, ${cityInfo.country}. Explore cost of living, weather, quality of life and more in this vibrant ${cityInfo.country} city.`,
+            keywords: [
+              cityInfo.name.toLowerCase(),
+              cityInfo.country.toLowerCase(),
+              'digital nomad',
+              'expat guide',
+              'cost of living',
+              'quality of life',
+              `${cityInfo.name.toLowerCase()} weather`,
+              `living in ${cityInfo.country.toLowerCase()}`
+            ]
+          }
+        };
+      } catch (error) {
+        console.error(`Error fetching data for ${cityInfo.name}:`, error);
+        return null;
+      }
+    })
+  );
+
+  return cities
+    .filter((result): result is PromiseFulfilledResult<City> => 
+      result.status === 'fulfilled' && result.value !== null
+    )
+    .map(result => result.value);
 };
 
-export async function getCityBySlug(slug: string) {
+export const getCityBySlug = async (slug: string): Promise<City | null> => {
+  const cityInfo = cityDatabase[slug.toLowerCase()];
+  if (!cityInfo) return null;
+
   try {
-    const cityName = slug.replace(/-/g, ' ');
-    const cityData = await dataService.getCityData(cityName);
-    
+    const cityData = await dataService.getCityData(cityInfo.name);
     return {
-      id: slug,
-      name: cityName,
-      slug: slug,
-      ...cityData
+      ...cityData,
+      name: cityInfo.name,
+      country: cityInfo.country,
+      countryCode: cityInfo.countryCode,
+      slug: slug.toLowerCase(),
+      description: cityInfo.description,
+      metadata: {
+        title: `Living in ${cityInfo.name}, ${cityInfo.country} - Digital Nomad Guide`,
+        description: `Comprehensive guide to living in ${cityInfo.name}, ${cityInfo.country}. Explore cost of living, weather, quality of life and more in this vibrant ${cityInfo.country} city.`,
+        keywords: [
+          cityInfo.name.toLowerCase(),
+          cityInfo.country.toLowerCase(),
+          'digital nomad',
+          'expat guide',
+          'cost of living',
+          'quality of life',
+          `${cityInfo.name.toLowerCase()} weather`,
+          `living in ${cityInfo.country.toLowerCase()}`
+        ]
+      }
     };
   } catch (error) {
     console.error('Error fetching city data:', error);
     return null;
   }
-}
+};
 
 export const generateStaticPaths = async () => {
-  return MOCK_CITIES.map(city => ({
-    params: { slug: city.slug }
+  return getAllCities().map(city => ({
+    params: { slug: city.name.toLowerCase() }
   }));
 }; 

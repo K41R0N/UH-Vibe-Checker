@@ -6,8 +6,8 @@
 .env*.local
 
 # Dependencies
-node_modules/
-.pnp/
+/node_modules
+/.pnp
 .pnp.js
 
 # Testing
@@ -40,3 +40,12 @@ next-env.d.ts
 .vscode/
 *.swp
 *.swo
+
+# New environment variables
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Project specific
+src/lib/config/constants.ts
+src/lib/data/cities.csv
