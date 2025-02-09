@@ -1,5 +1,5 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { City, CityData } from '@/types/city';
+import { City } from '@/types/city';
 import { getCityBySlug, generateStaticPaths } from '@/lib/cities';
 import Head from 'next/head';
 
@@ -74,6 +74,86 @@ export default function CityPage({ city }: CityPageProps) {
               <p>Humidity: {city.weather.humidity}%</p>
             </div>
           </section>
+        )}
+
+        {city.wikiData && (
+          <>
+            {city.wikiData.overview && (
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold mb-4">Overview</h2>
+                <div className="p-4 bg-gray-100 rounded">
+                  <p>{city.wikiData.overview}</p>
+                </div>
+              </section>
+            )}
+
+            {city.wikiData.gettingAround && (
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold mb-4">Getting Around</h2>
+                <div className="grid gap-4">
+                  {city.wikiData.gettingAround.byPublicTransport && (
+                    <div className="p-4 bg-gray-100 rounded">
+                      <p className="font-medium">Public Transport</p>
+                      <p>{city.wikiData.gettingAround.byPublicTransport}</p>
+                    </div>
+                  )}
+                  {city.wikiData.gettingAround.byTaxi && (
+                    <div className="p-4 bg-gray-100 rounded">
+                      <p className="font-medium">Taxis</p>
+                      <p>{city.wikiData.gettingAround.byTaxi}</p>
+                    </div>
+                  )}
+                  {city.wikiData.gettingAround.byBike && (
+                    <div className="p-4 bg-gray-100 rounded">
+                      <p className="font-medium">Cycling</p>
+                      <p>{city.wikiData.gettingAround.byBike}</p>
+                    </div>
+                  )}
+                  {city.wikiData.gettingAround.walking && (
+                    <div className="p-4 bg-gray-100 rounded">
+                      <p className="font-medium">Walking</p>
+                      <p>{city.wikiData.gettingAround.walking}</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {city.wikiData.practicalInfo && (
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold mb-4">Practical Information</h2>
+                <div className="grid gap-4">
+                  {city.wikiData.practicalInfo.visaRequirements && (
+                    <div className="p-4 bg-gray-100 rounded">
+                      <p className="font-medium">Visa Requirements</p>
+                      <p>{city.wikiData.practicalInfo.visaRequirements}</p>
+                    </div>
+                  )}
+                  {city.wikiData.practicalInfo.language && (
+                    <div className="p-4 bg-gray-100 rounded">
+                      <p className="font-medium">Language</p>
+                      <p>{city.wikiData.practicalInfo.language}</p>
+                    </div>
+                  )}
+                  {city.wikiData.practicalInfo.currency && (
+                    <div className="p-4 bg-gray-100 rounded">
+                      <p className="font-medium">Currency</p>
+                      <p>{city.wikiData.practicalInfo.currency}</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {city.wikiData.seasonalInfo && city.wikiData.seasonalInfo.bestTimeToVisit && (
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold mb-4">Best Time to Visit</h2>
+                <div className="p-4 bg-gray-100 rounded">
+                  <p>{city.wikiData.seasonalInfo.bestTimeToVisit}</p>
+                </div>
+              </section>
+            )}
+          </>
         )}
       </main>
     </>

@@ -1,7 +1,6 @@
 export function validateEnv() {
   const requiredEnvVars = [
-    'OPENWEATHER_API_KEY',
-    'OPENAI_API_KEY'
+    'NEXT_PUBLIC_OPENWEATHER_API_KEY'
   ];
 
   for (const envVar of requiredEnvVars) {
@@ -14,8 +13,7 @@ export function validateEnv() {
 }
 
 export const config = {
-  openWeatherKey: process.env.OPENWEATHER_API_KEY,
-  openAIKey: process.env.OPENAI_API_KEY,
+  openWeatherKey: process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY,
   cache: {
     ttl: parseInt(process.env.CACHE_TTL || '3600'),
     checkPeriod: parseInt(process.env.CACHE_CHECK_PERIOD || '120')

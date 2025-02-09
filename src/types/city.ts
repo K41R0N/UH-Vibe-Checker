@@ -8,6 +8,13 @@ export interface CityData {
   costOfLiving?: CostOfLivingData;
   qualityOfLife?: QualityOfLifeData;
   weather?: WeatherData;
+  wikiData?: WikiTravelData;
+  lastUpdated?: {
+    weather: Date;
+    wikiTravel: Date;
+    costOfLiving: Date;
+    news: Date;
+  };
 }
 
 export interface CostOfLivingData {
@@ -29,6 +36,56 @@ export interface WeatherData {
   humidity: number;
 }
 
+export interface WikiTravelData {
+  overview: string;
+  gettingAround: {
+    byPublicTransport: string;
+    byTaxi: string;
+    byBike: string;
+    walking: string;
+  };
+  neighborhoods: {
+    name: string;
+    description: string;
+    safetyLevel: string;
+    bestFor: string[];
+  }[];
+  practicalInfo: {
+    visaRequirements: string;
+    language: string;
+    currency: string;
+    emergencyNumbers: {
+      police: string;
+      ambulance: string;
+      fire: string;
+    };
+    internetConnectivity: {
+      averageSpeed: string;
+      publicWifi: string;
+      coworkingSpaces: string[];
+    };
+  };
+  culturalNotes: {
+    customs: string[];
+    etiquette: string[];
+    localLaws: string[];
+  };
+  seasonalInfo: {
+    bestTimeToVisit: string;
+    events: {
+      name: string;
+      date: string;
+      description: string;
+    }[];
+    weather: {
+      summer: string;
+      winter: string;
+      spring: string;
+      fall: string;
+    };
+  };
+}
+
 export interface City extends CityData {
   metadata: {
     title: string;
@@ -41,4 +98,25 @@ export interface SEOMetadata {
   title: string;
   description: string;
   keywords: string[];
+}
+
+export interface DataSource {
+  name: string;
+  url: string;
+  lastScraped: Date;
+  updateFrequency: number; // in hours
+  isActive: boolean;
+}
+
+export interface DataUpdateLog {
+  cityId: string;
+  sourceId: string;
+  timestamp: Date;
+  status: 'success' | 'failed';
+  changes: {
+    field: string;
+    oldValue: any;
+    newValue: any;
+  }[];
+  error?: string;
 } 

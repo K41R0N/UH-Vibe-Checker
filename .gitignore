@@ -1,10 +1,3 @@
-# Environment variables
-.env
-.env.local
-.env.development
-.env.production
-.env*.local
-
 # Dependencies
 /node_modules
 /.pnp
@@ -16,17 +9,33 @@
 # Next.js
 /.next/
 /out/
-
-# Production
 /build
+.next
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 
 # Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local env files
-.env*.local
+# System Files
+.DS_Store
+*.pem
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.vs/
 
 # Vercel
 .vercel
@@ -35,17 +44,17 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# New environment variables
-.env.development.local
-.env.test.local
-.env.production.local
-
 # Project specific
-src/lib/config/constants.ts
-src/lib/data/cities.csv
+/src/data/cities.json
+/data/wiki-travel-data.csv
+/scripts/csv-to-json.ts
+.env.development
+.env.production
+
+# Cache
+.cache/
+.npm/
+
+# Logs
+logs/
+*.log
