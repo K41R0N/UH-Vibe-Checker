@@ -94,11 +94,11 @@ export class CityService {
     return {
       ...rawCityData,
       weather,
-      metadata: this.generateMetadata(rawCityData, cityConfig)
+      metadata: this.generateMetadata(rawCityData)
     };
   }
 
-  private static generateMetadata(cityData: CityData, cityConfig: any) {
+  private static generateMetadata(cityData: CityData) {
     const cityName = cityData.name;
     const countryName = cityData.country;
     
