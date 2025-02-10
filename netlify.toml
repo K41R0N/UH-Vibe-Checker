@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci && npm install --save-dev typescript @types/react @types/node && npm run build"
+  command = "npm ci && npm run build"
   publish = ".next"
 
 [build.environment]
@@ -8,11 +8,17 @@
   NPM_VERSION = "9.6.7"
   NODE_ENV = "production"
   NEXT_PUBLIC_OPENWEATHER_API_KEY = "placeholder"
-  # Ensure proper Node environment
   CI = "true"
+  # Force TypeScript resolution
+  SKIP_PREFLIGHT_CHECK = "true"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+  [plugins.inputs]
+    # Force Next.js to use TypeScript
+    typescriptPath = "./node_modules/typescript"
+    tsconfigPath = "./tsconfig.json"
 
 [build.processing]
   skip_processing = true
