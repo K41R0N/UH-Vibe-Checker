@@ -3,6 +3,10 @@ import citiesData from '../../data/cities.json';
 import { SUPPORTED_CITIES, getCityBySlug as getConfigCity } from '../../data/cities-config';
 import { WeatherAPI } from '../api/providers/weather';
 
+type CitiesData = {
+  [key: string]: City;
+};
+
 const ITEMS_PER_PAGE = 20;
 
 export class CityService {
@@ -66,7 +70,7 @@ export class CityService {
     }
 
     const cityKey = cityConfig.name.toLowerCase();
-    const cityData = citiesData[cityKey];
+    const cityData = (citiesData as CitiesData)[cityKey];
     
     if (!cityData) {
       console.error(`No data found for city: ${cityConfig.name} (key: ${cityKey})`);
