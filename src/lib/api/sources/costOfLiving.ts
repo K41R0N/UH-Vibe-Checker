@@ -14,13 +14,13 @@ export class CostOfLivingAPI {
       
       // Backup sources if Teleport fails
       if (!response.data) {
-        return this.getFallbackData(cityName);
+        return this.getFallbackData();
       }
       
       return this.formatTeleportData(response.data);
     } catch (error) {
       console.error('Error fetching cost of living data:', error);
-      return this.getFallbackData(cityName);
+      return this.getFallbackData();
     }
   }
 
@@ -69,9 +69,8 @@ export class CostOfLivingAPI {
     return 'Challenging';
   }
 
-  // Fallback to our existing mock data if API fails
-  private async getFallbackData(cityName: string) {
-    // Use our existing mock data structure
+  // Fallback to default data if API fails
+  private async getFallbackData() {
     return {
       costOfLiving: {
         housing: 1200,
