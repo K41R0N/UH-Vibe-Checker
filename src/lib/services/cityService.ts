@@ -1,11 +1,9 @@
-import { City, CityData } from '@/types/city';
+import type { City, CityData } from '@/types/city';
 import citiesData from '@/data/cities.json';
 import { SUPPORTED_CITIES, getCityBySlug as getConfigCity } from '@/data/cities-config';
 import { WeatherAPI } from '../api/providers/weather';
 
-type RawCitiesData = {
-  [key: string]: CityData;
-};
+type RawCitiesData = Record<string, CityData>;
 
 const ITEMS_PER_PAGE = 20;
 
@@ -90,21 +88,92 @@ export class CityService {
       }
     }
 
-    // Enrich the raw data with generated metadata
-    return {
+    // Default values with proper types
+    const defaultCostOfLiving: CostOfLivingData = {
+      housing: 0,
+      food: 0,
+      transportation: 0,
+      utilities: 0
+    };
+
+    const defaultQualityOfLife: QualityOfLifeData = {
+      safety: 0,
+      healthcare: 0,
+      climate: 'Data coming soon'
+    };
+
+    const defaultWikiData: WikiTravelData = {
+      overview: `Information about ${rawCityData.name} is being compiled. Check back soon for detailed insights.`,
+      gettingAround: {
+        byPublicTransport: 'Information coming soon',
+        byTaxi: 'Information coming soon',
+        byBike: 'Information coming soon',
+        walking: 'Information coming soon'
+      },
+      neighborhoods: [],
+      practicalInfo: {
+        visaRequirements: 'Information being updated',
+        language: 'Information coming soon',
+        currency: 'Information coming soon',
+        emergencyNumbers: {
+          police: 'Check local emergency numbers',
+          ambulance: 'Check local emergency numbers',
+          fire: 'Check local emergency numbers'
+        },
+        internetConnectivity: {
+          averageSpeed: 'Data being collected',
+          publicWifi: 'Information coming soon',
+          coworkingSpaces: []
+        }
+      },
+      culturalNotes: {
+        customs: ['Information being compiled'],
+        etiquette: ['Information being compiled'],
+        localLaws: ['Check local regulations']
+      },
+      seasonalInfo: {
+        bestTimeToVisit: 'Information coming soon',
+        events: [],
+        weather: {
+          summer: 'Data coming soon',
+          winter: 'Data coming soon',
+          spring: 'Data coming soon',
+          fall: 'Data coming soon'
+        }
+      }
+    };
+
+    // Enrich and validate the raw data with proper type checking
+    const enrichedData: CityData = {
       ...rawCityData,
-      weather,
-      metadata: this.generateMetadata(rawCityData)
+      description: rawCityData.description || `Discover ${rawCityData.name}, a unique destination in ${rawCityData.country}.`,
+      costOfLiving: rawCityData.costOfLiving || defaultCostOfLiving,
+      qualityOfLife: rawCityData.qualityOfLife || defaultQualityOfLife,
+      weather: weather || null,
+      wikiData: rawCityData.wikiData || defaultWikiData
+    };
+
+    // Generate metadata
+    return {
+      ...enrichedData,
+      metadata: this.generateMetadata(enrichedData)
     };
   }
 
   private static generateMetadata(cityData: CityData) {
     const cityName = cityData.name;
     const countryName = cityData.country;
+    const hasFullData = Boolean(
+      cityData.costOfLiving &&
+      cityData.qualityOfLife &&
+      cityData.wikiData?.overview
+    );
     
     return {
       title: `Living in ${cityName}, ${countryName} - Digital Nomad Guide`,
-      description: cityData.description || `Explore ${cityName}, ${countryName}'s vibrant city life, cost of living, and quality of life metrics.`,
+      description: hasFullData
+        ? cityData.description
+        : `Explore ${cityName}, ${countryName}'s vibrant city life. We're actively gathering detailed information about cost of living, quality of life, and local insights. Check back soon for comprehensive data.`,
       keywords: [
         cityName.toLowerCase(),
         countryName.toLowerCase(),

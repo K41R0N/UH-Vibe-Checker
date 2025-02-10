@@ -1,22 +1,4 @@
-// Define our core data types
-export interface CityData {
-  id: string;
-  name: string;
-  country: string;
-  slug: string;
-  description: string;
-  costOfLiving?: CostOfLivingData;
-  qualityOfLife?: QualityOfLifeData;
-  weather?: WeatherData;
-  wikiData?: WikiTravelData;
-  lastUpdated?: {
-    weather: Date;
-    wikiTravel: Date;
-    costOfLiving: Date;
-    news: Date;
-  };
-}
-
+// City Data Types
 export interface CostOfLivingData {
   housing: number;
   food: number;
@@ -44,12 +26,12 @@ export interface WikiTravelData {
     byBike: string;
     walking: string;
   };
-  neighborhoods: {
+  neighborhoods: Array<{
     name: string;
     description: string;
     safetyLevel: string;
     bestFor: string[];
-  }[];
+  }>;
   practicalInfo: {
     visaRequirements: string;
     language: string;
@@ -72,11 +54,11 @@ export interface WikiTravelData {
   };
   seasonalInfo: {
     bestTimeToVisit: string;
-    events: {
+    events: Array<{
       name: string;
       date: string;
       description: string;
-    }[];
+    }>;
     weather: {
       summer: string;
       winter: string;
@@ -86,6 +68,26 @@ export interface WikiTravelData {
   };
 }
 
+// Core City Interface
+export interface CityData {
+  id: string;
+  name: string;
+  country: string;
+  slug: string;
+  description: string;
+  costOfLiving?: CostOfLivingData;
+  qualityOfLife?: QualityOfLifeData;
+  weather?: WeatherData;
+  wikiData?: WikiTravelData;
+  lastUpdated?: {
+    weather: Date;
+    wikiTravel: Date;
+    costOfLiving: Date;
+    news: Date;
+  };
+}
+
+// Extended City Interface with Metadata
 export interface City extends CityData {
   metadata: {
     title: string;
@@ -94,6 +96,7 @@ export interface City extends CityData {
   };
 }
 
+// Utility Types
 export interface SEOMetadata {
   title: string;
   description: string;
@@ -113,10 +116,10 @@ export interface DataUpdateLog {
   sourceId: string;
   timestamp: Date;
   status: 'success' | 'failed';
-  changes: {
+  changes: Array<{
     field: string;
     oldValue: any;
     newValue: any;
-  }[];
+  }>;
   error?: string;
 } 
