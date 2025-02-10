@@ -37,11 +37,16 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/types/**/*.ts"
+    "pages/**/*.ts",
+    "pages/**/*.tsx"
   ],
-  "exclude": ["node_modules", ".next", "out"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "scripts",
+    "Sample Scripts"
+  ]
 } 
