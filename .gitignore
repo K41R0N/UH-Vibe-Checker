@@ -45,6 +45,7 @@ ehthumbs.db
 .vs/
 *.sublime-workspace
 *.sublime-project
+.cursor/
 
 # Vercel
 .vercel
@@ -83,3 +84,8 @@ yarn-error.log*
 *.tmp
 *.temp
 .DS_Store
+
+# Critical files to NOT ignore
+!src/data/cities.json
+!src/types/
+!pages/cities/[slug].tsx
