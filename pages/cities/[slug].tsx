@@ -1,11 +1,12 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { City } from '@/types/city';
-import { CityService } from '@/lib/services/cityService';
+import { getCityBySlug, getCities } from '@/lib/services/cityService';
+import type { CityData } from '@/types/city';
+import CityDetails from '@/components/CityDetails';
 import Head from 'next/head';
 import Link from 'next/link';
 
 interface CityPageProps {
-  city?: City;
+  cityData: CityData;
   error?: string | null;
 }
 
@@ -16,7 +17,7 @@ const DataUnavailableMessage = () => (
   </div>
 );
 
-export default function CityPage({ city, error }: CityPageProps) {
+export default function CityPage({ cityData, error }: CityPageProps) {
   if (error) {
     return (
       <>
@@ -40,7 +41,7 @@ export default function CityPage({ city, error }: CityPageProps) {
     );
   }
 
-  if (!city || !city.metadata) {
+  if (!cityData || !cityData.metadata) {
     return (
       <>
         <Head>
@@ -60,12 +61,12 @@ export default function CityPage({ city, error }: CityPageProps) {
   return (
     <>
       <Head>
-        <title>{city.metadata.title}</title>
-        <meta name="description" content={city.metadata.description} />
+        <title>{cityData.metadata.title}</title>
+        <meta name="description" content={cityData.metadata.description} />
       </Head>
       <main className="max-w-4xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-4xl font-bold">{city.name}, {city.country}</h1>
+          <h1 className="text-4xl font-bold">{cityData.name}, {cityData.country}</h1>
           <Link
             href="/"
             className="px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors"
@@ -75,28 +76,28 @@ export default function CityPage({ city, error }: CityPageProps) {
         </div>
         
         <div className="mb-8 p-4 bg-blue-50 rounded-lg">
-          <p className="text-lg italic">{city.description}</p>
+          <p className="text-lg italic">{cityData.description}</p>
         </div>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Cost of Living</h2>
-          {city.costOfLiving ? (
+          {cityData.costOfLiving ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Housing</p>
-                <p className="text-xl">${city.costOfLiving.housing}/month</p>
+                <p className="text-xl">${cityData.costOfLiving.housing}/month</p>
               </div>
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Food</p>
-                <p className="text-xl">${city.costOfLiving.food}/month</p>
+                <p className="text-xl">${cityData.costOfLiving.food}/month</p>
               </div>
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Transportation</p>
-                <p className="text-xl">${city.costOfLiving.transportation}/month</p>
+                <p className="text-xl">${cityData.costOfLiving.transportation}/month</p>
               </div>
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Utilities</p>
-                <p className="text-xl">${city.costOfLiving.utilities}/month</p>
+                <p className="text-xl">${cityData.costOfLiving.utilities}/month</p>
               </div>
             </div>
           ) : <DataUnavailableMessage />}
@@ -104,19 +105,19 @@ export default function CityPage({ city, error }: CityPageProps) {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Quality of Life</h2>
-          {city.qualityOfLife ? (
+          {cityData.qualityOfLife ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Safety Score</p>
-                <p className="text-xl">{city.qualityOfLife.safety}/10</p>
+                <p className="text-xl">{cityData.qualityOfLife.safety}/10</p>
               </div>
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Healthcare</p>
-                <p className="text-xl">{city.qualityOfLife.healthcare}/10</p>
+                <p className="text-xl">{cityData.qualityOfLife.healthcare}/10</p>
               </div>
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Climate</p>
-                <p className="text-xl">{city.qualityOfLife.climate}</p>
+                <p className="text-xl">{cityData.qualityOfLife.climate}</p>
               </div>
             </div>
           ) : <DataUnavailableMessage />}
@@ -124,52 +125,52 @@ export default function CityPage({ city, error }: CityPageProps) {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Current Weather</h2>
-          {city.weather ? (
+          {cityData.weather ? (
             <div className="p-4 bg-gray-100 rounded">
-              <p className="font-medium">{city.weather.condition}</p>
-              <p className="text-xl">{city.weather.temperature}°C</p>
-              <p>Humidity: {city.weather.humidity}%</p>
+              <p className="font-medium">{cityData.weather.condition}</p>
+              <p className="text-xl">{cityData.weather.temperature}°C</p>
+              <p>Humidity: {cityData.weather.humidity}%</p>
             </div>
           ) : <DataUnavailableMessage />}
         </section>
 
-        {city.wikiData && (
+        {cityData.wikiData && (
           <>
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">Overview</h2>
-              {city.wikiData.overview ? (
+              {cityData.wikiData.overview ? (
                 <div className="p-4 bg-gray-100 rounded">
-                  <p>{city.wikiData.overview}</p>
+                  <p>{cityData.wikiData.overview}</p>
                 </div>
               ) : <DataUnavailableMessage />}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">Getting Around</h2>
-              {city.wikiData.gettingAround ? (
+              {cityData.wikiData.gettingAround ? (
                 <div className="grid gap-4">
-                  {city.wikiData.gettingAround.byPublicTransport && (
+                  {cityData.wikiData.gettingAround.byPublicTransport && (
                     <div className="p-4 bg-gray-100 rounded">
                       <p className="font-medium">Public Transport</p>
-                      <p>{city.wikiData.gettingAround.byPublicTransport}</p>
+                      <p>{cityData.wikiData.gettingAround.byPublicTransport}</p>
                     </div>
                   )}
-                  {city.wikiData.gettingAround.byTaxi && (
+                  {cityData.wikiData.gettingAround.byTaxi && (
                     <div className="p-4 bg-gray-100 rounded">
                       <p className="font-medium">Taxis</p>
-                      <p>{city.wikiData.gettingAround.byTaxi}</p>
+                      <p>{cityData.wikiData.gettingAround.byTaxi}</p>
                     </div>
                   )}
-                  {city.wikiData.gettingAround.byBike && (
+                  {cityData.wikiData.gettingAround.byBike && (
                     <div className="p-4 bg-gray-100 rounded">
                       <p className="font-medium">Cycling</p>
-                      <p>{city.wikiData.gettingAround.byBike}</p>
+                      <p>{cityData.wikiData.gettingAround.byBike}</p>
                     </div>
                   )}
-                  {city.wikiData.gettingAround.walking && (
+                  {cityData.wikiData.gettingAround.walking && (
                     <div className="p-4 bg-gray-100 rounded">
                       <p className="font-medium">Walking</p>
-                      <p>{city.wikiData.gettingAround.walking}</p>
+                      <p>{cityData.wikiData.gettingAround.walking}</p>
                     </div>
                   )}
                 </div>
@@ -178,36 +179,36 @@ export default function CityPage({ city, error }: CityPageProps) {
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">Practical Information</h2>
-              {city.wikiData.practicalInfo ? (
+              {cityData.wikiData.practicalInfo ? (
                 <div className="grid gap-4">
-                  {city.wikiData.practicalInfo.visaRequirements && (
+                  {cityData.wikiData.practicalInfo.visaRequirements && (
                     <div className="p-4 bg-gray-100 rounded">
                       <p className="font-medium">Visa Requirements</p>
-                      <p>{city.wikiData.practicalInfo.visaRequirements}</p>
+                      <p>{cityData.wikiData.practicalInfo.visaRequirements}</p>
                     </div>
                   )}
-                  {city.wikiData.practicalInfo.language && (
+                  {cityData.wikiData.practicalInfo.language && (
                     <div className="p-4 bg-gray-100 rounded">
                       <p className="font-medium">Language</p>
-                      <p>{city.wikiData.practicalInfo.language}</p>
+                      <p>{cityData.wikiData.practicalInfo.language}</p>
                     </div>
                   )}
-                  {city.wikiData.practicalInfo.currency && (
+                  {cityData.wikiData.practicalInfo.currency && (
                     <div className="p-4 bg-gray-100 rounded">
                       <p className="font-medium">Currency</p>
-                      <p>{city.wikiData.practicalInfo.currency}</p>
+                      <p>{cityData.wikiData.practicalInfo.currency}</p>
                     </div>
                   )}
                 </div>
               ) : <DataUnavailableMessage />}
             </section>
 
-            {city.wikiData.seasonalInfo && (
+            {cityData.wikiData.seasonalInfo && (
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">Best Time to Visit</h2>
-                {city.wikiData.seasonalInfo.bestTimeToVisit ? (
+                {cityData.wikiData.seasonalInfo.bestTimeToVisit ? (
                   <div className="p-4 bg-gray-100 rounded">
-                    <p>{city.wikiData.seasonalInfo.bestTimeToVisit}</p>
+                    <p>{cityData.wikiData.seasonalInfo.bestTimeToVisit}</p>
                   </div>
                 ) : <DataUnavailableMessage />}
               </section>
@@ -220,56 +221,32 @@ export default function CityPage({ city, error }: CityPageProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const paths = await CityService.generateStaticPaths();
-    return {
-      paths,
-      fallback: 'blocking' // This allows for ISR (Incremental Static Regeneration)
-    };
-  } catch (error) {
-    console.error('Error generating paths:', error);
-    return {
-      paths: [],
-      fallback: 'blocking'
-    };
-  }
+  const cities = getCities();
+  
+  const paths = cities.map((city) => ({
+    params: { slug: city.slug },
+  }));
+
+  return {
+    paths,
+    fallback: false,
+  };
 };
 
-export const getStaticProps: GetStaticProps<CityPageProps> = async (context) => {
-  try {
-    const slug = context.params?.slug as string;
-    const result = await CityService.getCityBySlug(slug);
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params?.slug as string;
+  const cityData = await getCityBySlug(slug);
 
-    if (!result.city) {
-      // If we have an error message, we'll show it on a custom error page
-      if (result.error) {
-        return {
-          props: {
-            error: result.error
-          },
-          // Still generate this page but with error state
-          revalidate: 60 // Try again sooner for error cases
-        };
-      }
-      // If no error message, use 404
-      return { notFound: true };
-    }
-
+  if (!cityData) {
     return {
-      props: { 
-        city: result.city,
-        // Clear any previous errors
-        error: null
-      },
-      revalidate: 3600 // Revalidate every hour for successful cases
-    };
-  } catch (error) {
-    console.error('Error in getStaticProps:', error);
-    return { 
-      props: { 
-        error: 'An unexpected error occurred while loading the city data.'
-      },
-      revalidate: 60
+      notFound: true,
     };
   }
+
+  return {
+    props: {
+      cityData,
+    },
+    revalidate: 3600, // Revalidate every hour
+  };
 }; 

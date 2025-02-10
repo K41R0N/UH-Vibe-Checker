@@ -1,4 +1,9 @@
 // City Data Types
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+
 export interface CostOfLivingData {
   housing: number;
   food: number;
@@ -13,78 +18,49 @@ export interface QualityOfLifeData {
 }
 
 export interface WeatherData {
-  temperature: number;
   condition: string;
+  temperature: number;
   humidity: number;
 }
 
+export interface GettingAround {
+  byPublicTransport?: string;
+  byTaxi?: string;
+  byBike?: string;
+  walking?: string;
+}
+
+export interface PracticalInfo {
+  visaRequirements?: string;
+  language?: string;
+  currency?: string;
+}
+
+export interface SeasonalInfo {
+  bestTimeToVisit?: string;
+}
+
 export interface WikiTravelData {
-  overview: string;
-  gettingAround: {
-    byPublicTransport: string;
-    byTaxi: string;
-    byBike: string;
-    walking: string;
-  };
-  neighborhoods: Array<{
-    name: string;
-    description: string;
-    safetyLevel: string;
-    bestFor: string[];
-  }>;
-  practicalInfo: {
-    visaRequirements: string;
-    language: string;
-    currency: string;
-    emergencyNumbers: {
-      police: string;
-      ambulance: string;
-      fire: string;
-    };
-    internetConnectivity: {
-      averageSpeed: string;
-      publicWifi: string;
-      coworkingSpaces: string[];
-    };
-  };
-  culturalNotes: {
-    customs: string[];
-    etiquette: string[];
-    localLaws: string[];
-  };
-  seasonalInfo: {
-    bestTimeToVisit: string;
-    events: Array<{
-      name: string;
-      date: string;
-      description: string;
-    }>;
-    weather: {
-      summer: string;
-      winter: string;
-      spring: string;
-      fall: string;
-    };
-  };
+  overview?: string;
+  gettingAround?: GettingAround;
+  practicalInfo?: PracticalInfo;
+  seasonalInfo?: SeasonalInfo;
+}
+
+export interface Metadata {
+  title: string;
+  description: string;
 }
 
 // Core City Interface
-export interface CityData {
-  id: string;
-  name: string;
-  country: string;
-  slug: string;
+export interface CityData extends City {
   description: string;
-  costOfLiving?: CostOfLivingData;
-  qualityOfLife?: QualityOfLifeData;
-  weather?: WeatherData;
+  coordinates: Coordinates;
+  costOfLiving: CostOfLivingData;
+  qualityOfLife: QualityOfLifeData;
+  currentWeather?: WeatherData;
   wikiData?: WikiTravelData;
-  lastUpdated?: {
-    weather: string;    // ISO date string
-    wikiTravel: string; // ISO date string
-    costOfLiving: string; // ISO date string
-    news: string;       // ISO date string
-  };
+  metadata: Metadata;
 }
 
 // Extended City Interface with Metadata

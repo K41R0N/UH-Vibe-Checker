@@ -1,19 +1,37 @@
-import citiesData from './cities.json';
+import type { City } from '@/types/city';
 
-export interface CityConfig {
-  name: string;
-  countryCode: string;
-  country: string;
-  region?: string;
-  slug: string;
-  alternateNames?: string[];
-  timezone: string;
-  isPopular: boolean;
-  coordinates?: {
-    lat: number;
-    lon: number;
-  };
-}
+export const SUPPORTED_CITIES: City[] = [
+  {
+    slug: 'barcelona',
+    name: 'Barcelona',
+    country: 'Spain',
+  },
+  {
+    slug: 'berlin',
+    name: 'Berlin',
+    country: 'Germany',
+  },
+  {
+    slug: 'london',
+    name: 'London',
+    country: 'United Kingdom',
+  },
+  {
+    slug: 'new-york',
+    name: 'New York',
+    country: 'United States',
+  },
+  {
+    slug: 'paris',
+    name: 'Paris',
+    country: 'France',
+  },
+  {
+    slug: 'tokyo',
+    name: 'Tokyo',
+    country: 'Japan',
+  },
+];
 
 // Map of country names to ISO country codes
 const COUNTRY_CODES: Record<string, string> = {
@@ -59,7 +77,7 @@ type CityDataEntry = {
 };
 
 // Generate supported cities from our JSON data
-export const SUPPORTED_CITIES: CityConfig[] = Object.values(citiesData).map((cityData: CityDataEntry) => ({
+export const SUPPORTED_CITIES_JSON: CityConfig[] = Object.values(citiesData).map((cityData: CityDataEntry) => ({
   name: cityData.name,
   country: cityData.country,
   countryCode: COUNTRY_CODES[cityData.country] || 'XX',
@@ -71,11 +89,11 @@ export const SUPPORTED_CITIES: CityConfig[] = Object.values(citiesData).map((cit
 // Utility functions
 export const getCityBySlug = (slug: string): CityConfig | undefined => {
   // First try exact match
-  let city = SUPPORTED_CITIES.find(city => city.slug === slug);
+  let city = SUPPORTED_CITIES_JSON.find(city => city.slug === slug);
   
   if (!city) {
     // If not found, try matching just the city part (for backward compatibility)
-    city = SUPPORTED_CITIES.find(city => {
+    city = SUPPORTED_CITIES_JSON.find(city => {
       const cityPart = city.name.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '')
@@ -89,11 +107,11 @@ export const getCityBySlug = (slug: string): CityConfig | undefined => {
 };
 
 export const getPopularCities = (): CityConfig[] => 
-  SUPPORTED_CITIES.filter(city => city.isPopular);
+  SUPPORTED_CITIES_JSON.filter(city => city.isPopular);
 
 export const getCityByName = (name: string): CityConfig | undefined => {
   const normalizedName = name.toLowerCase();
-  return SUPPORTED_CITIES.find(city => 
+  return SUPPORTED_CITIES_JSON.find(city => 
     city.name.toLowerCase() === normalizedName ||
     city.alternateNames?.some(alt => alt.toLowerCase() === normalizedName)
   );
@@ -101,10 +119,10 @@ export const getCityByName = (name: string): CityConfig | undefined => {
 
 // Additional utility functions
 export const getAllCountries = (): string[] =>
-  Array.from(new Set(SUPPORTED_CITIES.map(city => city.country))).sort();
+  Array.from(new Set(SUPPORTED_CITIES_JSON.map(city => city.country))).sort();
 
 export const getCitiesByCountry = (country: string): CityConfig[] =>
-  SUPPORTED_CITIES.filter(city => city.country === country);
+  SUPPORTED_CITIES_JSON.filter(city => city.country === country);
 
 export const getCountryCode = (country: string): string =>
   COUNTRY_CODES[country] || 'XX'; 
