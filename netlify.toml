@@ -9,11 +9,7 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    skipBuildVersionCheck = true
-    useNewRuntime = true
 
-# Specify runtime settings
 [functions]
   node_bundler = "esbuild"
   included_files = ["src/data/cities.json"]
