@@ -80,10 +80,10 @@ export interface CityData {
   weather?: WeatherData;
   wikiData?: WikiTravelData;
   lastUpdated?: {
-    weather: Date;
-    wikiTravel: Date;
-    costOfLiving: Date;
-    news: Date;
+    weather: string;    // ISO date string
+    wikiTravel: string; // ISO date string
+    costOfLiving: string; // ISO date string
+    news: string;       // ISO date string
   };
 }
 

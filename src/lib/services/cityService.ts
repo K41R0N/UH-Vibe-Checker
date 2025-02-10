@@ -26,9 +26,18 @@ export class CityService {
     if (!name || !country) {
       throw new Error(`Invalid city data: name=${name}, country=${country}`);
     }
-    return `${name.toLowerCase()}-${country.toLowerCase()}`
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '');
+    
+    // Normalize both name and country, ensuring consistent spacing
+    const normalizedName = name.toLowerCase().trim()
+      .replace(/\s+/g, '-');     // Replace all spaces with hyphens in city name
+    const normalizedCountry = country.toLowerCase().trim()
+      .replace(/\s+/g, '-');     // Replace all spaces with hyphens in country name
+    
+    // Create the combined slug with format: city-name-country
+    return `${normalizedName}-${normalizedCountry}`
+      .replace(/[^a-z0-9-]/g, '') // Remove any special characters
+      .replace(/-+/g, '-')        // Replace multiple consecutive hyphens with a single one
+      .replace(/^-|-$/g, '');     // Remove leading/trailing hyphens
   }
 
   private static resetApiCallsIfNewDay() {
@@ -68,19 +77,50 @@ export class CityService {
     }
   }
 
+  private static generateMetadata(cityData: CityData) {
+    const cityName = cityData.name;
+    const countryName = cityData.country;
+    const hasFullData = Boolean(
+      cityData.costOfLiving &&
+      cityData.qualityOfLife &&
+      cityData.wikiData?.overview
+    );
+    
+    return {
+      title: `Living in ${cityName}, ${countryName} - Digital Nomad Guide`,
+      description: hasFullData
+        ? cityData.description
+        : `Explore ${cityName}, ${countryName}'s vibrant city life. We're actively gathering detailed information about cost of living, quality of life, and local insights. Check back soon for comprehensive data.`,
+      keywords: [
+        cityName.toLowerCase(),
+        countryName.toLowerCase(),
+        'digital nomad',
+        'expat guide',
+        'cost of living',
+        'quality of life',
+        `${cityName.toLowerCase()} weather`,
+        `living in ${countryName.toLowerCase()}`
+      ]
+    };
+  }
+
   private static async createCityObject(cityConfig: any, loadWeather = false): Promise<City | null> {
     if (!cityConfig.name) {
       console.error('Invalid city config:', cityConfig);
       return null;
     }
 
-    const cityKey = cityConfig.name.toLowerCase();
+    // Normalize the city key to handle spaces and special characters
+    const cityKey = cityConfig.name.toLowerCase().replace(/-/g, ' ');
     const rawCityData = (citiesData as RawCitiesData)[cityKey];
     
     if (!rawCityData) {
       console.error(`No data found for city: ${cityConfig.name} (key: ${cityKey})`);
       return null;
     }
+
+    // Generate the proper slug with city and country
+    const slug = this.generateSlug(cityConfig.name, cityConfig.country);
 
     // Always set weather to null by default
     let weather = null;
@@ -153,44 +193,28 @@ export class CityService {
     // Enrich and validate the raw data with proper type checking
     const enrichedData: CityData = {
       ...rawCityData,
+      slug, // Use the properly generated slug
       description: rawCityData.description || `Discover ${rawCityData.name}, a unique destination in ${rawCityData.country}.`,
-      costOfLiving: rawCityData.costOfLiving || defaultCostOfLiving,
-      qualityOfLife: rawCityData.qualityOfLife || defaultQualityOfLife,
+      // Only provide defaults if the data exists but is incomplete
+      costOfLiving: rawCityData.costOfLiving 
+        ? { ...defaultCostOfLiving, ...rawCityData.costOfLiving }
+        : null,
+      qualityOfLife: rawCityData.qualityOfLife
+        ? { ...defaultQualityOfLife, ...rawCityData.qualityOfLife }
+        : null,
       weather: weather || null,
-      wikiData: rawCityData.wikiData || defaultWikiData
+      wikiData: rawCityData.wikiData
+        ? { ...defaultWikiData, ...rawCityData.wikiData }
+        : null
     };
 
-    // Generate metadata
+    // Always generate metadata, even if other data is missing
+    const metadata = this.generateMetadata(enrichedData);
+
+    // Return the complete city object
     return {
       ...enrichedData,
-      metadata: this.generateMetadata(enrichedData)
-    };
-  }
-
-  private static generateMetadata(cityData: CityData) {
-    const cityName = cityData.name;
-    const countryName = cityData.country;
-    const hasFullData = Boolean(
-      cityData.costOfLiving &&
-      cityData.qualityOfLife &&
-      cityData.wikiData?.overview
-    );
-    
-    return {
-      title: `Living in ${cityName}, ${countryName} - Digital Nomad Guide`,
-      description: hasFullData
-        ? cityData.description
-        : `Explore ${cityName}, ${countryName}'s vibrant city life. We're actively gathering detailed information about cost of living, quality of life, and local insights. Check back soon for comprehensive data.`,
-      keywords: [
-        cityName.toLowerCase(),
-        countryName.toLowerCase(),
-        'digital nomad',
-        'expat guide',
-        'cost of living',
-        'quality of life',
-        `${cityName.toLowerCase()} weather`,
-        `living in ${countryName.toLowerCase()}`
-      ]
+      metadata
     };
   }
 
@@ -217,29 +241,65 @@ export class CityService {
     }
   }
 
-  static async getCityBySlug(slug: string): Promise<City | null> {
+  static async getCityBySlug(slug: string): Promise<{ city: City | null; error?: string }> {
     try {
       const cityConfig = getConfigCity(slug);
       if (!cityConfig) {
-        console.error(`No config found for slug: ${slug}`);
-        return null;
+        return {
+          city: null,
+          error: `City configuration not found for slug: ${slug}`
+        };
       }
 
-      // Always load weather for individual city pages, but handle failures gracefully
-      return this.createCityObject(cityConfig, true);
+      const cityData = await this.createCityObject(cityConfig, true);
+      
+      if (!cityData) {
+        return {
+          city: null,
+          error: `Failed to create city object for ${slug}. This might be due to missing or invalid data.`
+        };
+      }
+
+      // Get current timestamp as ISO string for serialization
+      const now = new Date().toISOString();
+
+      // Add lastUpdated timestamp for better caching
+      return {
+        city: {
+          ...cityData,
+          lastUpdated: {
+            weather: now,
+            wikiTravel: now,
+            costOfLiving: now,
+            news: now
+          }
+        }
+      };
     } catch (error) {
-      console.error('Error fetching city by slug:', error);
-      return null;
+      console.error(`Error fetching city by slug ${slug}:`, error);
+      return {
+        city: null,
+        error: 'An unexpected error occurred while fetching city data.'
+      };
     }
   }
 
   static generateStaticPaths() {
     try {
-      return SUPPORTED_CITIES.map(city => ({
-        params: {
-          slug: this.generateSlug(city.name, city.country)
-        }
-      }));
+      return SUPPORTED_CITIES.map(city => {
+        // Generate just the city part of the slug for URLs
+        const citySlug = city.name.toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+
+        return {
+          params: {
+            slug: citySlug
+          }
+        };
+      });
     } catch (error) {
       console.error('Error generating static paths:', error);
       return [];
