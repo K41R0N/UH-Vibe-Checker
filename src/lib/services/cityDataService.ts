@@ -13,10 +13,11 @@ export class CityDataService {
   private cache: NodeCache;
   private rateLimiter: RateLimiter;
   private readonly CACHE_FILE_PATH: string;
+  private static readonly MAX_API_CALLS = 950; // Keep some buffer below 1000
   
   constructor(cacheConfig: CacheConfig) {
     this.cache = new NodeCache(cacheConfig);
-    this.rateLimiter = new RateLimiter();
+    this.rateLimiter = new RateLimiter(this.MAX_API_CALLS);
     this.CACHE_FILE_PATH = path.join(process.cwd(), 'cache', 'cities');
   }
 
@@ -40,20 +41,28 @@ export class CityDataService {
       console.error(`Error loading cache for ${cityConfig.slug}:`, error);
     }
 
-    // Fetch fresh data if cache miss
-    try {
-      await this.rateLimiter.limit();
-      cityData = await this.fetchCityData(cityConfig);
-      
-      // Update both caches
-      this.cache.set(cacheKey, cityData);
-      await this.saveToFileCache(cityConfig.slug, cityData);
-      
-      return cityData;
-    } catch (error) {
-      console.error(`Error fetching data for ${cityConfig.slug}:`, error);
-      return null;
+    // Fetch fresh data if cache miss and we haven't hit rate limits
+    if (this.rateLimiter.canMakeRequest()) {
+      try {
+        cityData = await this.fetchCityData(cityConfig);
+        this.rateLimiter.incrementRequests();
+        
+        // Update both caches
+        if (cityData) {
+          this.cache.set(cacheKey, cityData);
+          await this.saveToFileCache(cityConfig.slug, cityData);
+        }
+        
+        return cityData;
+      } catch (error) {
+        console.error(`Error fetching data for ${cityConfig.slug}:`, error);
+      }
+    } else {
+      console.warn(`Rate limit reached, using cached data for ${cityConfig.slug}`);
     }
+
+    // Return null if all attempts fail
+    return null;
   }
 
   private async loadFromFileCache(slug: string) {
@@ -86,12 +95,14 @@ export class CityDataService {
   }
 
   private async fetchCityData(cityConfig: CityConfig) {
-    // Implementation of your GeoDB API calls here
-    // This will be similar to your test file but more structured
+    // Implementation of your API calls here
+    // This is a placeholder that will be implemented later
+    return null;
   }
 
   // Method to refresh all city data (can be run daily via cron)
   async refreshAllCities() {
     // Implementation for refreshing all city data
+    // This is a placeholder that will be implemented later
   }
 } 
