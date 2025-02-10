@@ -5,12 +5,14 @@ import { City } from '@/types/city'
 import { CityService } from '@/lib/services/cityService'
 import Head from 'next/head'
 
+// Configuration
+export const ITEMS_PER_PAGE = 20;
+
 interface HomeProps {
   initialCities: City[]
   totalCities: number
+  pageSize: number
 }
-
-const ITEMS_PER_PAGE = 20
 
 const WeatherDisplay = ({ weather }: { weather: City['weather'] }) => {
   if (!weather) {
@@ -28,19 +30,21 @@ const WeatherDisplay = ({ weather }: { weather: City['weather'] }) => {
   )
 }
 
-export default function Home({ initialCities, totalCities }: HomeProps) {
+export default function Home({ initialCities, totalCities, pageSize }: HomeProps) {
   const [cities, setCities] = useState<City[]>(initialCities)
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
 
   const loadMore = async () => {
+    if (loading || cities.length >= totalCities) return;
+
     try {
       setLoading(true)
       const nextPage = currentPage + 1
-      const result = await fetch(`/api/cities?page=${nextPage}`)
+      const result = await fetch(`/api/cities?page=${nextPage}&pageSize=${pageSize}`)
       const data = await result.json()
       
-      if (data.cities) {
+      if (data.cities?.length) {
         setCities(prev => [...prev, ...data.cities])
         setCurrentPage(nextPage)
       }
@@ -118,7 +122,8 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     return {
       props: {
         initialCities: cities,
-        totalCities: total
+        totalCities: total,
+        pageSize: ITEMS_PER_PAGE
       },
       revalidate: 3600 // Revalidate every hour
     }
@@ -127,7 +132,8 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     return {
       props: {
         initialCities: [],
-        totalCities: 0
+        totalCities: 0,
+        pageSize: ITEMS_PER_PAGE
       },
       revalidate: 60 // Retry sooner if there was an error
     }
