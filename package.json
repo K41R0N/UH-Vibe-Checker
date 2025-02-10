@@ -11,8 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "next telemetry disable",
-    "prepare": "npm install --save-dev typescript@5.3.3"
+    "postinstall": "next telemetry disable"
   },
   "dependencies": {
     "axios": "1.7.9",
@@ -29,7 +28,8 @@
     "autoprefixer": "10.4.16",
     "postcss": "8.4.33",
     "tailwindcss": "3.4.1",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "@types/axios": "^0.14.0"
   },
   "resolutions": {
     "react": "18.2.0",

@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --save-dev typescript@5.3.3 && npm run build"
+  command = "npm ci && npm run build"
   publish = ".next"
 
 [build.environment]
@@ -8,6 +8,8 @@
   NPM_VERSION = "9.6.7"
   NODE_ENV = "production"
   NEXT_PUBLIC_OPENWEATHER_API_KEY = "placeholder"
+  # Ensure proper Node environment
+  CI = "true"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

@@ -98,10 +98,25 @@ export const SUPPORTED_CITIES: CityConfig[] = (() => {
 
 // Utility functions
 export const getCityBySlug = (slug: string): CityConfig | undefined => {
-  const city = SUPPORTED_CITIES.find(city => city.slug === slug);
+  // First try exact match
+  let city = SUPPORTED_CITIES.find(city => city.slug === slug);
+  
+  if (!city) {
+    // If not found, try matching just the city part (for backward compatibility)
+    city = SUPPORTED_CITIES.find(city => {
+      const cityPart = city.name.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      return cityPart === slug;
+    });
+  }
+
   if (!city) {
     console.error(`No city found for slug: ${slug}`);
   }
+
   return city;
 };
 
