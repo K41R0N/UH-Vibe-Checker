@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node -e \"if(!require('fs').existsSync('node_modules/typescript')) { process.exit(1) }\" || npm install typescript @types/react @types/node",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -19,14 +20,14 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "axios": "1.7.9",
-    "node-cache": "5.1.2"
-  },
-  "devDependencies": {
-    "@netlify/plugin-nextjs": "5.9.4",
+    "node-cache": "5.1.2",
     "typescript": "5.3.3",
     "@types/node": "20.17.16",
     "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.0",
+    "@types/react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@netlify/plugin-nextjs": "5.9.4",
     "autoprefixer": "10.4.16",
     "postcss": "8.4.33",
     "tailwindcss": "3.4.1"
