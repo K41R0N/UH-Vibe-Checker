@@ -94,9 +94,18 @@ export class CityDataService {
     }
   }
 
-  private async fetchCityData(cityConfig: CityConfig) {
+  /**
+   * Placeholder method for fetching city data from external APIs.
+   * TODO: Implement this method to fetch real data from APIs.
+   * Currently returns null to indicate no implementation.
+   * 
+   * @param _cityConfig - City configuration (currently unused)
+   * @returns Promise that resolves to null (placeholder)
+   */
+  private async fetchCityData(_cityConfig: CityConfig) {
     // Implementation of your API calls here
     // This is a placeholder that will be implemented later
+    // Using underscore prefix to indicate intentionally unused parameter
     return null;
   }
 
