@@ -2,7 +2,7 @@
   # Install dependencies, then TypeScript, then build
   command = """
     npm ci --prefer-offline --no-audit --progress=false &&
-    npm install -g typescript &&
+    npm install typescript @types/react @types/node --no-save &&
     npm run build
   """
   publish = ".next"

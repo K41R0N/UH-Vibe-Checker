@@ -7,42 +7,12 @@ import type {
   WikiTravelData
 } from '@/types/city';
 import citiesData from '@/data/cities.json';
-import { SUPPORTED_CITIES } from '@/data/cities-config';
+import { SUPPORTED_CITIES, getCityBySlug as getConfigCity } from '@/data/cities-config';
 import { WeatherAPI } from '../api/providers/weather';
 
 type RawCitiesData = Record<string, CityData>;
 
 const ITEMS_PER_PAGE = 20;
-
-export const getCities = (page: number = 1): City[] => {
-  const start = (page - 1) * ITEMS_PER_PAGE;
-  const end = start + ITEMS_PER_PAGE;
-  return SUPPORTED_CITIES.slice(start, end);
-};
-
-export const getCityBySlug = async (slug: string): Promise<CityData | null> => {
-  const rawData = citiesData as RawCitiesData;
-  const cityData = rawData[slug];
-  
-  if (!cityData) {
-    return null;
-  }
-
-  try {
-    const weatherData = await WeatherAPI.getCurrentWeather(cityData.coordinates);
-    return {
-      ...cityData,
-      currentWeather: weatherData
-    };
-  } catch (error) {
-    console.error(`Failed to fetch weather data for ${slug}:`, error);
-    return cityData; // Return city data without weather if API fails
-  }
-};
-
-export const getTotalCities = (): number => {
-  return SUPPORTED_CITIES.length;
-};
 
 export class CityService {
   private static weatherAPI = new WeatherAPI();
@@ -78,7 +48,7 @@ export class CityService {
     }
   }
 
-  private static async getWeatherData(cityName: string) {
+  private static async getWeatherData(cityName: string): Promise<WeatherData | null> {
     this.resetApiCallsIfNewDay();
 
     const cacheKey = `weather_${cityName.toLowerCase()}`;
@@ -288,7 +258,7 @@ export class CityService {
       // Get weather data if needed
       let weather = null;
       try {
-        weather = await this.weatherAPI.getCityWeather(cityData.name);
+        weather = await this.getWeatherData(cityData.name);
       } catch (error) {
         console.error(`Failed to fetch weather for ${cityData.name}:`, error);
       }
