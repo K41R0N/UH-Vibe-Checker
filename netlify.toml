@@ -13,10 +13,6 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    # Ensure proper Next.js handling
-    nextjsBasePath = ""
-    nextjsEnablePreview = false
 
 [build.processing]
   skip_processing = true
