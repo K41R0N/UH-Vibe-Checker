@@ -6,7 +6,8 @@ import { CityService } from '@/lib/services/cityService'
 import Head from 'next/head'
 
 interface HomeProps {
-  cities: City[]
+  initialCities: City[]
+  totalCities: number
 }
 
 const ITEMS_PER_PAGE = 20
@@ -27,27 +28,37 @@ const WeatherDisplay = ({ weather }: { weather: City['weather'] }) => {
   )
 }
 
-export default function Home({ cities = [] }: HomeProps) {
-  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE)
+export default function Home({ initialCities, totalCities }: HomeProps) {
+  const [cities, setCities] = useState<City[]>(initialCities)
+  const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const showMore = () => {
-    setVisibleItems(prev => Math.min(prev + ITEMS_PER_PAGE, cities.length))
-  }
-
-  if (!Array.isArray(cities)) {
-    return (
-      <main className="max-w-4xl mx-auto p-6">
-        <h1 className="text-4xl font-bold mb-8">Vibe Checker</h1>
-        <p className="text-red-600">Unable to load cities. Please try again later.</p>
-      </main>
-    )
+  const loadMore = async () => {
+    try {
+      setLoading(true)
+      const nextPage = currentPage + 1
+      const result = await fetch(`/api/cities?page=${nextPage}`)
+      const data = await result.json()
+      
+      if (data.cities) {
+        setCities(prev => [...prev, ...data.cities])
+        setCurrentPage(nextPage)
+      }
+    } catch (error) {
+      console.error('Error loading more cities:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <>
       <Head>
         <title>Vibe Checker - Digital Nomad City Guides</title>
-        <meta name="description" content="Explore comprehensive city guides for digital nomads. Compare cost of living, quality of life, and local insights for popular destinations worldwide." />
+        <meta
+          name="description"
+          content="Explore comprehensive city guides for digital nomads. Compare cost of living, quality of life, and local insights for popular destinations worldwide."
+        />
       </Head>
       
       <main className="max-w-4xl mx-auto p-6">
@@ -59,7 +70,7 @@ export default function Home({ cities = [] }: HomeProps) {
         ) : (
           <>
             <div className="grid gap-6 md:grid-cols-2">
-              {cities.slice(0, visibleItems).map((city) => (
+              {cities.map((city) => (
                 <Link 
                   href={`/cities/${city.slug}`} 
                   key={city.id || `${city.name}-${city.country}`.toLowerCase()}
@@ -74,18 +85,21 @@ export default function Home({ cities = [] }: HomeProps) {
               ))}
             </div>
 
-            {visibleItems < cities.length && (
+            {cities.length < totalCities && (
               <div className="flex justify-center mt-8">
                 <button
-                  onClick={showMore}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  onClick={loadMore}
+                  disabled={loading}
+                  className={`px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  Load More Cities
+                  {loading ? 'Loading...' : 'Load More Cities'}
                 </button>
               </div>
             )}
 
-            {visibleItems >= cities.length && cities.length > ITEMS_PER_PAGE && (
+            {cities.length >= totalCities && (
               <p className="text-center text-gray-600 mt-8">
                 You've viewed all available cities
               </p>
@@ -99,15 +113,12 @@ export default function Home({ cities = [] }: HomeProps) {
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
-    const cities = await CityService.getCities()
-    
-    if (!cities || !Array.isArray(cities)) {
-      throw new Error('Invalid cities data received')
-    }
+    const { cities, total } = await CityService.getCities(1, false) // Don't load weather for initial page
     
     return {
       props: {
-        cities
+        initialCities: cities,
+        totalCities: total
       },
       revalidate: 3600 // Revalidate every hour
     }
@@ -115,7 +126,8 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     console.error('Error fetching cities:', error)
     return {
       props: {
-        cities: [] // Return empty array if fetch fails
+        initialCities: [],
+        totalCities: 0
       },
       revalidate: 60 // Retry sooner if there was an error
     }

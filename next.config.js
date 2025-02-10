@@ -18,7 +18,25 @@ const nextConfig = {
         type: 'asset/resource'
       });
     }
+    config.module.rules.push({
+      test: /\.json$/,
+      type: 'json'
+    });
     return config;
+  },
+  // Add custom headers to suppress favicon 404s in development
+  async headers() {
+    return [
+      {
+        source: '/favicon.ico',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   }
 };
 

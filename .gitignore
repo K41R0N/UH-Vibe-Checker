@@ -54,7 +54,6 @@ ehthumbs.db
 next-env.d.ts
 
 # Project specific
-/src/data/cities.json
 /data/wiki-travel-data.csv
 /scripts/csv-to-json.ts
 /src/lib/config/constants.ts

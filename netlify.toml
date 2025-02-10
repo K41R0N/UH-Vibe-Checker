@@ -22,4 +22,7 @@
 [dev]
   command = "npm run dev"
   port = 8888
-  targetPort = 3000 
+  targetPort = 3000
+
+# Note: Environment variables should be set in the Netlify dashboard
+# Do not add API keys or sensitive data here 

@@ -1,5 +1,8 @@
 import citiesData from './cities.json';
 
+// Log the imported data to help diagnose the issue
+console.log('Imported citiesData:', typeof citiesData, Object.keys(citiesData).length, 'cities');
+
 export interface CityConfig {
   name: string;
   countryCode: string;
@@ -7,8 +10,8 @@ export interface CityConfig {
   region?: string;
   slug: string;
   alternateNames?: string[];
-  timezone?: string;
-  isPopular?: boolean;
+  timezone: string;
+  isPopular: boolean;
   coordinates?: {
     lat: number;
     lon: number;
@@ -33,28 +36,85 @@ const CITY_TIMEZONES: Record<string, string> = {
   // Add more as needed
 };
 
+const generateSlug = (name: string, country: string): string => {
+  if (!name || !country) {
+    throw new Error(`Invalid city data: name=${name}, country=${country}`);
+  }
+  return `${name.toLowerCase()}-${country.toLowerCase()}`
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+};
+
+type CityDataEntry = {
+  name: string;
+  country: string;
+  slug: string;
+  [key: string]: any;
+};
+
 // Generate supported cities from our JSON data
-export const SUPPORTED_CITIES: CityConfig[] = Object.entries(citiesData).map(([key, data]) => ({
-  name: data.name,
-  country: data.country,
-  countryCode: COUNTRY_CODES[data.country] || 'XX',
-  slug: `${data.name.toLowerCase()}-${data.country.toLowerCase()}`.replace(/\s+/g, '-'),
-  timezone: CITY_TIMEZONES[key] || 'UTC',
-  isPopular: ['barcelona', 'lisbon', 'berlin'].includes(key) // Example popular cities
-}));
+export const SUPPORTED_CITIES: CityConfig[] = (() => {
+  try {
+    if (!citiesData || typeof citiesData !== 'object') {
+      console.error('citiesData is not an object:', citiesData);
+      return [];
+    }
+
+    const entries = Object.entries(citiesData);
+    const validCities: CityConfig[] = [];
+
+    for (const [key, data] of entries) {
+      if (!data || typeof data !== 'object') {
+        console.error('Invalid city data entry:', key, data);
+        continue;
+      }
+
+      const cityData = data as CityDataEntry;
+      if (!cityData.name || !cityData.country) {
+        console.error('Missing required fields in city data:', key, cityData);
+        continue;
+      }
+
+      // Create the city config using the slug from JSON data
+      const cityConfig: CityConfig = {
+        name: cityData.name,
+        country: cityData.country,
+        countryCode: COUNTRY_CODES[cityData.country] || 'XX',
+        slug: generateSlug(cityData.name, cityData.country), // Always generate the slug with city and country
+        timezone: CITY_TIMEZONES[key] || 'UTC',
+        isPopular: true // All cities are available in the list
+      };
+
+      validCities.push(cityConfig);
+    }
+
+    console.log(`Successfully loaded ${validCities.length} cities`);
+    return validCities;
+  } catch (error) {
+    console.error('Error processing cities data:', error);
+    return [];
+  }
+})();
 
 // Utility functions
-export const getCityBySlug = (slug: string): CityConfig | undefined => 
-  SUPPORTED_CITIES.find(city => city.slug === slug);
+export const getCityBySlug = (slug: string): CityConfig | undefined => {
+  const city = SUPPORTED_CITIES.find(city => city.slug === slug);
+  if (!city) {
+    console.error(`No city found for slug: ${slug}`);
+  }
+  return city;
+};
 
 export const getPopularCities = (): CityConfig[] => 
   SUPPORTED_CITIES.filter(city => city.isPopular);
 
-export const getCityByName = (name: string): CityConfig | undefined =>
-  SUPPORTED_CITIES.find(city => 
-    city.name.toLowerCase() === name.toLowerCase() ||
-    city.alternateNames?.some(alt => alt.toLowerCase() === name.toLowerCase())
+export const getCityByName = (name: string): CityConfig | undefined => {
+  const normalizedName = name.toLowerCase();
+  return SUPPORTED_CITIES.find(city => 
+    city.name.toLowerCase() === normalizedName ||
+    city.alternateNames?.some(alt => alt.toLowerCase() === normalizedName)
   );
+};
 
 // Additional utility functions
 export const getAllCountries = (): string[] =>
