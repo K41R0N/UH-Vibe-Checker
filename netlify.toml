@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci && npm install --save-dev @types/react @types/node && npm run build"
+  command = "npm ci && npm run build"
   publish = ".next"
 
 [build.environment]
@@ -8,9 +8,15 @@
   NPM_VERSION = "9.6.7"
   NODE_ENV = "production"
   CI = "true"
+  # Ensure proper dependency installation
+  NPM_FLAGS = "--legacy-peer-deps=true"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+  [plugins.inputs]
+    # Ensure proper Next.js handling
+    nextjsBasePath = ""
+    nextjsEnablePreview = false
 
 [build.processing]
   skip_processing = true
@@ -47,4 +53,7 @@
 # 1. Environment variables (API keys, etc.) should be set in the Netlify dashboard
 # 2. Required environment variables:
 #    - NEXT_PUBLIC_OPENWEATHER_API_KEY
-# 3. The build will use TypeScript from node_modules 
+# 3. Future API integrations:
+#    - Huggingface API (planned)
+#    - Database connections (planned)
+#    - Additional weather providers (planned) 
