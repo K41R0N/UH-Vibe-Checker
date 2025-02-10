@@ -28,6 +28,35 @@
   - [ ] Routing configuration
   - [ ] Deployment documentation
 
+## Future Routing Enhancement (V3)
+- [ ] Country-Based Directory Structure
+  - [ ] Update URL structure to /[country]/[city]
+  - [ ] Create country landing pages
+  - [ ] Verify data structure compatibility:
+    - [ ] Check city name normalization
+    - [ ] Ensure consistent country naming/codes
+    - [ ] Update slug generation for new format
+  - [ ] Required Changes:
+    - [ ] Modify getStaticPaths to handle nested dynamic routes
+    - [ ] Update city configuration to support country grouping
+    - [ ] Create country metadata structure
+    - [ ] Add country-specific SEO handling
+  - [ ] Data Organization:
+    - [ ] Group cities by country in data structure
+    - [ ] Add country-specific metadata
+    - [ ] Create country statistics aggregation
+    - [ ] Implement country-based filtering
+  - [ ] UI/UX Considerations:
+    - [ ] Design country landing pages
+    - [ ] Add country-based navigation
+    - [ ] Create breadcrumb navigation
+    - [ ] Update internal links to new URL structure
+  - [ ] Technical Requirements:
+    - [ ] Update Next.js configuration for nested dynamic routes
+    - [ ] Modify API endpoints to support country-based queries
+    - [ ] Add country-based caching strategy
+    - [ ] Update TypeScript types for country data
+
 ## Version 3 Development
 
 ### Phase 1: AI Integration

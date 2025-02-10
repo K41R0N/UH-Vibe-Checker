@@ -7,18 +7,10 @@
   NODE_VERSION = "18.17.0"
   NPM_VERSION = "9.6.7"
   NODE_ENV = "production"
-  NEXT_PUBLIC_OPENWEATHER_API_KEY = "placeholder"
   CI = "true"
-  # Force TypeScript resolution
-  SKIP_PREFLIGHT_CHECK = "true"
-  NPM_FLAGS = "--legacy-peer-deps"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    # Force Next.js to use TypeScript
-    typescriptPath = "./node_modules/typescript"
-    tsconfigPath = "./tsconfig.json"
 
 [build.processing]
   skip_processing = true
@@ -51,5 +43,8 @@
   port = 8888
   targetPort = 3000
 
-# Note: Environment variables should be set in the Netlify dashboard
-# Do not add API keys or sensitive data here 
+# Important Notes:
+# 1. Environment variables (API keys, etc.) should be set in the Netlify dashboard
+# 2. Required environment variables:
+#    - NEXT_PUBLIC_OPENWEATHER_API_KEY
+# 3. The build will use TypeScript from node_modules 

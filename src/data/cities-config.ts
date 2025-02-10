@@ -1,8 +1,5 @@
 import citiesData from './cities.json';
 
-// Log the imported data to help diagnose the issue
-console.log('Imported citiesData:', typeof citiesData, Object.keys(citiesData).length, 'cities');
-
 export interface CityConfig {
   name: string;
   countryCode: string;
@@ -24,15 +21,22 @@ const COUNTRY_CODES: Record<string, string> = {
   'Spain': 'ES',
   'Portugal': 'PT',
   'Germany': 'DE',
+  'United States': 'US',
+  'United Kingdom': 'GB',
+  'France': 'FR',
+  'Italy': 'IT',
   // Add more as needed
 };
 
 // Map of cities to their timezones
 const CITY_TIMEZONES: Record<string, string> = {
-  'barcelona': 'Europe/Madrid',
-  'lisbon': 'Europe/Lisbon',
-  'berlin': 'Europe/Berlin',
-  'tirana': 'Europe/Tirane',
+  'barcelona-spain': 'Europe/Madrid',
+  'lisbon-portugal': 'Europe/Lisbon',
+  'berlin-germany': 'Europe/Berlin',
+  'london-united-kingdom': 'Europe/London',
+  'paris-france': 'Europe/Paris',
+  'rome-italy': 'Europe/Rome',
+  'new-york-united-states': 'America/New_York',
   // Add more as needed
 };
 
@@ -42,7 +46,9 @@ const generateSlug = (name: string, country: string): string => {
   }
   return `${name.toLowerCase()}-${country.toLowerCase()}`
     .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 };
 
 type CityDataEntry = {
@@ -53,48 +59,14 @@ type CityDataEntry = {
 };
 
 // Generate supported cities from our JSON data
-export const SUPPORTED_CITIES: CityConfig[] = (() => {
-  try {
-    if (!citiesData || typeof citiesData !== 'object') {
-      console.error('citiesData is not an object:', citiesData);
-      return [];
-    }
-
-    const entries = Object.entries(citiesData);
-    const validCities: CityConfig[] = [];
-
-    for (const [key, data] of entries) {
-      if (!data || typeof data !== 'object') {
-        console.error('Invalid city data entry:', key, data);
-        continue;
-      }
-
-      const cityData = data as CityDataEntry;
-      if (!cityData.name || !cityData.country) {
-        console.error('Missing required fields in city data:', key, cityData);
-        continue;
-      }
-
-      // Create the city config using the slug from JSON data
-      const cityConfig: CityConfig = {
-        name: cityData.name,
-        country: cityData.country,
-        countryCode: COUNTRY_CODES[cityData.country] || 'XX',
-        slug: generateSlug(cityData.name, cityData.country), // Always generate the slug with city and country
-        timezone: CITY_TIMEZONES[key] || 'UTC',
-        isPopular: true // All cities are available in the list
-      };
-
-      validCities.push(cityConfig);
-    }
-
-    console.log(`Successfully loaded ${validCities.length} cities`);
-    return validCities;
-  } catch (error) {
-    console.error('Error processing cities data:', error);
-    return [];
-  }
-})();
+export const SUPPORTED_CITIES: CityConfig[] = Object.values(citiesData).map((cityData: CityDataEntry) => ({
+  name: cityData.name,
+  country: cityData.country,
+  countryCode: COUNTRY_CODES[cityData.country] || 'XX',
+  slug: generateSlug(cityData.name, cityData.country),
+  timezone: CITY_TIMEZONES[generateSlug(cityData.name, cityData.country)] || 'UTC',
+  isPopular: true // All cities in our database are considered available
+}));
 
 // Utility functions
 export const getCityBySlug = (slug: string): CityConfig | undefined => {
@@ -111,10 +83,6 @@ export const getCityBySlug = (slug: string): CityConfig | undefined => {
         .replace(/^-|-$/g, '');
       return cityPart === slug;
     });
-  }
-
-  if (!city) {
-    console.error(`No city found for slug: ${slug}`);
   }
 
   return city;

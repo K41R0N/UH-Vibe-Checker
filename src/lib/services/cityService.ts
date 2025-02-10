@@ -243,30 +243,46 @@ export class CityService {
 
   static async getCityBySlug(slug: string): Promise<{ city: City | null; error?: string }> {
     try {
-      const cityConfig = getConfigCity(slug);
-      if (!cityConfig) {
-        return {
-          city: null,
-          error: `City configuration not found for slug: ${slug}`
-        };
-      }
+      // Find the city in our data using just the name-based slug
+      const cityData = Object.values(citiesData).find(city => 
+        this.generateSlug(city.name, city.country) === slug
+      );
 
-      const cityData = await this.createCityObject(cityConfig, true);
-      
       if (!cityData) {
         return {
           city: null,
-          error: `Failed to create city object for ${slug}. This might be due to missing or invalid data.`
+          error: `City not found: ${slug}`
         };
       }
 
-      // Get current timestamp as ISO string for serialization
+      // Get weather data if needed
+      let weather = null;
+      try {
+        weather = await this.weatherAPI.getCityWeather(cityData.name);
+      } catch (error) {
+        console.error(`Failed to fetch weather for ${cityData.name}:`, error);
+      }
+
+      // Get current timestamp
       const now = new Date().toISOString();
 
-      // Add lastUpdated timestamp for better caching
+      // Return the complete city object
       return {
         city: {
           ...cityData,
+          weather,
+          metadata: {
+            title: `Living in ${cityData.name}, ${cityData.country} - Digital Nomad Guide`,
+            description: cityData.description || `Explore ${cityData.name}, ${cityData.country}'s vibrant city life.`,
+            keywords: [
+              cityData.name.toLowerCase(),
+              cityData.country.toLowerCase(),
+              'digital nomad',
+              'expat guide',
+              'cost of living',
+              'quality of life'
+            ]
+          },
           lastUpdated: {
             weather: now,
             wikiTravel: now,
@@ -286,20 +302,11 @@ export class CityService {
 
   static generateStaticPaths() {
     try {
-      return SUPPORTED_CITIES.map(city => {
-        // Generate just the city part of the slug for URLs
-        const citySlug = city.name.toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '')
-          .replace(/-+/g, '-')
-          .replace(/^-|-$/g, '');
-
-        return {
-          params: {
-            slug: citySlug
-          }
-        };
-      });
+      return Object.values(citiesData).map(city => ({
+        params: {
+          slug: this.generateSlug(city.name, city.country)
+        }
+      }));
     } catch (error) {
       console.error('Error generating static paths:', error);
       return [];

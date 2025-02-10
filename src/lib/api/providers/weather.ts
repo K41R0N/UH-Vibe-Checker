@@ -7,14 +7,26 @@ export class WeatherAPI {
   private config = API_CONFIG.weather;
   private fallbackData: WeatherData = {
     temperature: 20,
-    condition: 'Unknown',
+    condition: 'Weather data loading...',
     humidity: 50
   };
 
   async getCityWeather(cityName: string): Promise<WeatherData> {
+    // Always use fallback data in development
+    if (process.env.NODE_ENV === 'development') {
+      return {
+        ...this.fallbackData,
+        condition: 'Development mode - weather data simulated'
+      };
+    }
+
+    // In production, we expect the API key to be set in Netlify
     if (!this.apiKey) {
-      console.warn('OpenWeather API key not found, using fallback data');
-      return this.fallbackData;
+      console.warn('OpenWeather API key not found in production environment');
+      return {
+        ...this.fallbackData,
+        condition: 'Weather data temporarily unavailable'
+      };
     }
 
     try {
@@ -30,16 +42,20 @@ export class WeatherAPI {
         }
       );
 
+      if (!response.data || !response.data.main) {
+        throw new Error('Invalid weather data received');
+      }
+
       return {
         temperature: Math.round(response.data.main.temp),
-        condition: response.data.weather[0].description,
+        condition: response.data.weather?.[0]?.description || 'Clear sky',
         humidity: response.data.main.humidity
       };
     } catch (error) {
-      console.error('Error fetching weather data:', error);
+      console.error(`Error fetching weather for ${cityName}:`, error);
       return {
         ...this.fallbackData,
-        condition: `Weather data unavailable for ${cityName}`
+        condition: 'Weather data temporarily unavailable'
       };
     }
   }
