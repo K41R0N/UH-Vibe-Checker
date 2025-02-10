@@ -14,6 +14,12 @@
   - [ ] Data integration from cities.json
   - [ ] Weather API integration
   - [ ] Static site generation setup
+  - [ ] Implement fetchCityData in CityDataService
+    - [ ] Integrate with OpenWeather API
+    - [ ] Add Teleport API integration
+    - [ ] Implement data normalization
+    - [ ] Add proper error handling
+    - [ ] Test rate limiting functionality
 
 - [ ] Netlify Deployment Setup
   - [ ] Verify build configuration
