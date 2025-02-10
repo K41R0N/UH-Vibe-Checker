@@ -1,14 +1,48 @@
+import { useState } from 'react'
 import Link from 'next/link'
 import { GetStaticProps } from 'next'
 import { City } from '@/types/city'
-import { getCities } from '@/lib/cities'
+import { CityService } from '@/lib/services/cityService'
 import Head from 'next/head'
 
 interface HomeProps {
   cities: City[]
 }
 
-export default function Home({ cities }: HomeProps) {
+const ITEMS_PER_PAGE = 20
+
+const WeatherDisplay = ({ weather }: { weather: City['weather'] }) => {
+  if (!weather) {
+    return (
+      <div className="mt-4 text-sm text-gray-500">
+        Weather data temporarily unavailable
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-4 text-sm text-gray-500">
+      Currently: {weather.temperature}°C, {weather.condition}
+    </div>
+  )
+}
+
+export default function Home({ cities = [] }: HomeProps) {
+  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE)
+
+  const showMore = () => {
+    setVisibleItems(prev => Math.min(prev + ITEMS_PER_PAGE, cities.length))
+  }
+
+  if (!Array.isArray(cities)) {
+    return (
+      <main className="max-w-4xl mx-auto p-6">
+        <h1 className="text-4xl font-bold mb-8">Vibe Checker</h1>
+        <p className="text-red-600">Unable to load cities. Please try again later.</p>
+      </main>
+    )
+  }
+
   return (
     <>
       <Head>
@@ -20,37 +54,70 @@ export default function Home({ cities }: HomeProps) {
         <h1 className="text-4xl font-bold mb-8">Vibe Checker</h1>
         <p className="text-xl mb-8">Discover your next destination</p>
         
-        <div className="grid gap-6 md:grid-cols-2">
-          {cities.map((city) => (
-            <Link 
-              href={`/cities/${city.slug}`} 
-              key={city.id}
-              className="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-            >
-              <h2 className="text-2xl font-semibold mb-2">
-                {city.name}, {city.country}
-              </h2>
-              <p className="text-gray-600 mb-4">{city.description}</p>
-              {city.weather && (
-                <div className="mt-4 text-sm text-gray-500">
-                  Currently: {city.weather.temperature}°C, {city.weather.condition}
-                </div>
-              )}
-            </Link>
-          ))}
-        </div>
+        {cities.length === 0 ? (
+          <p className="text-gray-600 text-center">No cities available at the moment. Please check back later.</p>
+        ) : (
+          <>
+            <div className="grid gap-6 md:grid-cols-2">
+              {cities.slice(0, visibleItems).map((city) => (
+                <Link 
+                  href={`/cities/${city.slug}`} 
+                  key={city.id || `${city.name}-${city.country}`.toLowerCase()}
+                  className="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <h2 className="text-2xl font-semibold mb-2">
+                    {city.name}, {city.country}
+                  </h2>
+                  <p className="text-gray-600 mb-4">{city.description}</p>
+                  <WeatherDisplay weather={city.weather} />
+                </Link>
+              ))}
+            </div>
+
+            {visibleItems < cities.length && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={showMore}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Load More Cities
+                </button>
+              </div>
+            )}
+
+            {visibleItems >= cities.length && cities.length > ITEMS_PER_PAGE && (
+              <p className="text-center text-gray-600 mt-8">
+                You've viewed all available cities
+              </p>
+            )}
+          </>
+        )}
       </main>
     </>
   )
 }
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  const cities = await getCities()
-  
-  return {
-    props: {
-      cities
-    },
-    revalidate: 3600 // Revalidate every hour
+  try {
+    const cities = await CityService.getCities()
+    
+    if (!cities || !Array.isArray(cities)) {
+      throw new Error('Invalid cities data received')
+    }
+    
+    return {
+      props: {
+        cities
+      },
+      revalidate: 3600 // Revalidate every hour
+    }
+  } catch (error) {
+    console.error('Error fetching cities:', error)
+    return {
+      props: {
+        cities: [] // Return empty array if fetch fails
+      },
+      revalidate: 60 // Retry sooner if there was an error
+    }
   }
 } 

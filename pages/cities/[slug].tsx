@@ -1,11 +1,18 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { City } from '@/types/city';
-import { getCityBySlug, generateStaticPaths } from '@/lib/cities';
+import { CityService } from '@/lib/services/cityService';
 import Head from 'next/head';
 
 interface CityPageProps {
   city: City;
 }
+
+const DataUnavailableMessage = () => (
+  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+    <p className="font-medium">Temporarily Unavailable</p>
+    <p className="text-sm">We're having trouble fetching this data. Please check back later.</p>
+  </div>
+);
 
 export default function CityPage({ city }: CityPageProps) {
   return (
@@ -21,9 +28,9 @@ export default function CityPage({ city }: CityPageProps) {
           <p className="text-lg italic">{city.description}</p>
         </div>
 
-        {city.costOfLiving && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Cost of Living</h2>
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Cost of Living</h2>
+          {city.costOfLiving ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Housing</p>
@@ -42,12 +49,12 @@ export default function CityPage({ city }: CityPageProps) {
                 <p className="text-xl">${city.costOfLiving.utilities}/month</p>
               </div>
             </div>
-          </section>
-        )}
+          ) : <DataUnavailableMessage />}
+        </section>
 
-        {city.qualityOfLife && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Quality of Life</h2>
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Quality of Life</h2>
+          {city.qualityOfLife ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-gray-100 rounded">
                 <p className="font-medium">Safety Score</p>
@@ -62,34 +69,34 @@ export default function CityPage({ city }: CityPageProps) {
                 <p className="text-xl">{city.qualityOfLife.climate}</p>
               </div>
             </div>
-          </section>
-        )}
+          ) : <DataUnavailableMessage />}
+        </section>
 
-        {city.weather && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Current Weather</h2>
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Current Weather</h2>
+          {city.weather ? (
             <div className="p-4 bg-gray-100 rounded">
               <p className="font-medium">{city.weather.condition}</p>
               <p className="text-xl">{city.weather.temperature}°C</p>
               <p>Humidity: {city.weather.humidity}%</p>
             </div>
-          </section>
-        )}
+          ) : <DataUnavailableMessage />}
+        </section>
 
         {city.wikiData && (
           <>
-            {city.wikiData.overview && (
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Overview</h2>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">Overview</h2>
+              {city.wikiData.overview ? (
                 <div className="p-4 bg-gray-100 rounded">
                   <p>{city.wikiData.overview}</p>
                 </div>
-              </section>
-            )}
+              ) : <DataUnavailableMessage />}
+            </section>
 
-            {city.wikiData.gettingAround && (
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Getting Around</h2>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">Getting Around</h2>
+              {city.wikiData.gettingAround ? (
                 <div className="grid gap-4">
                   {city.wikiData.gettingAround.byPublicTransport && (
                     <div className="p-4 bg-gray-100 rounded">
@@ -116,12 +123,12 @@ export default function CityPage({ city }: CityPageProps) {
                     </div>
                   )}
                 </div>
-              </section>
-            )}
+              ) : <DataUnavailableMessage />}
+            </section>
 
-            {city.wikiData.practicalInfo && (
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Practical Information</h2>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">Practical Information</h2>
+              {city.wikiData.practicalInfo ? (
                 <div className="grid gap-4">
                   {city.wikiData.practicalInfo.visaRequirements && (
                     <div className="p-4 bg-gray-100 rounded">
@@ -142,15 +149,17 @@ export default function CityPage({ city }: CityPageProps) {
                     </div>
                   )}
                 </div>
-              </section>
-            )}
+              ) : <DataUnavailableMessage />}
+            </section>
 
-            {city.wikiData.seasonalInfo && city.wikiData.seasonalInfo.bestTimeToVisit && (
+            {city.wikiData.seasonalInfo && (
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">Best Time to Visit</h2>
-                <div className="p-4 bg-gray-100 rounded">
-                  <p>{city.wikiData.seasonalInfo.bestTimeToVisit}</p>
-                </div>
+                {city.wikiData.seasonalInfo.bestTimeToVisit ? (
+                  <div className="p-4 bg-gray-100 rounded">
+                    <p>{city.wikiData.seasonalInfo.bestTimeToVisit}</p>
+                  </div>
+                ) : <DataUnavailableMessage />}
               </section>
             )}
           </>
@@ -161,33 +170,36 @@ export default function CityPage({ city }: CityPageProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = await generateStaticPaths();
-  return {
-    paths,
-    fallback: false
-  };
+  try {
+    const paths = await CityService.generateStaticPaths();
+    return {
+      paths,
+      fallback: 'blocking' // This allows for ISR (Incremental Static Regeneration)
+    };
+  } catch (error) {
+    console.error('Error generating paths:', error);
+    return {
+      paths: [],
+      fallback: 'blocking'
+    };
+  }
 };
 
 export const getStaticProps: GetStaticProps<CityPageProps> = async (context) => {
-  const slug = context.params?.slug as string;
-  const cityData = await getCityBySlug(slug);
+  try {
+    const slug = context.params?.slug as string;
+    const cityData = await CityService.getCityBySlug(slug);
 
-  if (!cityData) {
+    if (!cityData) {
+      return { notFound: true };
+    }
+
+    return {
+      props: { city: cityData },
+      revalidate: 3600 // Revalidate every hour
+    };
+  } catch (error) {
+    console.error('Error fetching city data:', error);
     return { notFound: true };
   }
-
-  // Transform CityData to City by adding metadata
-  const city: City = {
-    ...cityData,
-    metadata: {
-      title: `Living in ${cityData.name} - City Guide`,
-      description: `Complete guide to living in ${cityData.name}, ${cityData.country}. Explore cost of living, quality of life, and more.`,
-      keywords: [cityData.name.toLowerCase(), cityData.country.toLowerCase(), 'cost of living', 'expat']
-    }
-  };
-
-  return {
-    props: { city },
-    revalidate: 3600 // Revalidate every hour
-  };
 }; 

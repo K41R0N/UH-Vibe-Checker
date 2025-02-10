@@ -38,7 +38,7 @@ export const SUPPORTED_CITIES: CityConfig[] = Object.entries(citiesData).map(([k
   name: data.name,
   country: data.country,
   countryCode: COUNTRY_CODES[data.country] || 'XX',
-  slug: data.slug,
+  slug: `${data.name.toLowerCase()}-${data.country.toLowerCase()}`.replace(/\s+/g, '-'),
   timezone: CITY_TIMEZONES[key] || 'UTC',
   isPopular: ['barcelona', 'lisbon', 'berlin'].includes(key) // Example popular cities
 }));

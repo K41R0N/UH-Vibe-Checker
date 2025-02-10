@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { WeatherData } from '@/types/city';
+import { API_CONFIG, getApiKey } from '@/lib/config/api';
 
 export class WeatherAPI {
-  private apiKey = process.env.OPENWEATHER_API_KEY;
-  private baseURL = 'https://api.openweathermap.org/data/2.5';
+  private apiKey = getApiKey('weather');
+  private config = API_CONFIG.weather;
   private fallbackData: WeatherData = {
     temperature: 20,
     condition: 'Unknown',
@@ -18,8 +19,15 @@ export class WeatherAPI {
 
     try {
       const response = await axios.get(
-        `${this.baseURL}/weather?q=${encodeURIComponent(cityName)}&units=metric&appid=${this.apiKey}`,
-        { timeout: 5000 }
+        `${this.config.baseURL}/weather`,
+        {
+          params: {
+            q: cityName,
+            ...this.config.defaultParams,
+            appid: this.apiKey
+          },
+          timeout: this.config.timeout
+        }
       );
 
       return {

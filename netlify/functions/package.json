@@ -1,0 +1,9 @@
+{
+  "name": "vibe-checker-functions",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@netlify/functions": "^2.6.0",
+    "node-fetch": "^2.6.7"
+  }
+} 

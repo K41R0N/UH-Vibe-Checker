@@ -11,14 +11,16 @@
 /out/
 /build
 .next
+/dist
 
-# Environment Variables
+# Environment Variables - Strict Rules
 .env
+.env.*
+!.env.template
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env*.local
 
 # Debug
 npm-debug.log*
@@ -29,6 +31,11 @@ yarn-error.log*
 .DS_Store
 *.pem
 Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 
 # IDE
 .idea/
@@ -36,6 +43,8 @@ Thumbs.db
 *.swp
 *.swo
 .vs/
+*.sublime-workspace
+*.sublime-project
 
 # Vercel
 .vercel
@@ -48,13 +57,30 @@ next-env.d.ts
 /src/data/cities.json
 /data/wiki-travel-data.csv
 /scripts/csv-to-json.ts
-.env.development
-.env.production
+/src/lib/config/constants.ts
 
 # Cache
 .cache/
 .npm/
+.eslintcache
 
 # Logs
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local Netlify folder
+.netlify
+
+# Build output
+/build/
+/dist/
+/.next/
+/out/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
