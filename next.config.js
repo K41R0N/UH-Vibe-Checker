@@ -6,13 +6,25 @@ const nextConfig = {
     unoptimized: true,
     domains: []
   },
-  // Ensure our JSON data is available
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    // Ensure JSON files are processed correctly
     config.module.rules.push({
       test: /\.json$/,
       type: 'json'
     });
+
+    // Add source directory alias
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, './src')
+    };
+
     return config;
+  },
+  // Explicitly set TypeScript path aliases
+  experimental: {
+    esmExternals: 'loose',
+    externalDir: true
   }
 };
 

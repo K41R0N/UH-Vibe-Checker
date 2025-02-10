@@ -1,4 +1,11 @@
-import type { City, CityData } from '@/types/city';
+import type {
+  City,
+  CityData,
+  CostOfLivingData,
+  QualityOfLifeData,
+  WeatherData,
+  WikiTravelData
+} from '@/types/city';
 import citiesData from '@/data/cities.json';
 import { SUPPORTED_CITIES, getCityBySlug as getConfigCity } from '@/data/cities-config';
 import { WeatherAPI } from '../api/providers/weather';
