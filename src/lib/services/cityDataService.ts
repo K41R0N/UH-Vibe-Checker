@@ -17,7 +17,7 @@ export class CityDataService {
   
   constructor(cacheConfig: CacheConfig) {
     this.cache = new NodeCache(cacheConfig);
-    this.rateLimiter = new RateLimiter(this.MAX_API_CALLS);
+    this.rateLimiter = new RateLimiter(CityDataService.MAX_API_CALLS);
     this.CACHE_FILE_PATH = path.join(process.cwd(), 'cache', 'cities');
   }
 
