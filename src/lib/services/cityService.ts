@@ -1,10 +1,10 @@
-import { City } from '../../types/city';
-import citiesData from '../../data/cities.json';
-import { SUPPORTED_CITIES, getCityBySlug as getConfigCity } from '../../data/cities-config';
+import { City, CityData } from '@/types/city';
+import citiesData from '@/data/cities.json';
+import { SUPPORTED_CITIES, getCityBySlug as getConfigCity } from '@/data/cities-config';
 import { WeatherAPI } from '../api/providers/weather';
 
-type CitiesData = {
-  [key: string]: City;
+type RawCitiesData = {
+  [key: string]: CityData;
 };
 
 const ITEMS_PER_PAGE = 20;
@@ -70,9 +70,9 @@ export class CityService {
     }
 
     const cityKey = cityConfig.name.toLowerCase();
-    const cityData = (citiesData as CitiesData)[cityKey];
+    const rawCityData = (citiesData as RawCitiesData)[cityKey];
     
-    if (!cityData) {
+    if (!rawCityData) {
       console.error(`No data found for city: ${cityConfig.name} (key: ${cityKey})`);
       return null;
     }
@@ -90,24 +90,31 @@ export class CityService {
       }
     }
 
+    // Enrich the raw data with generated metadata
     return {
-      ...cityData,
-      slug: this.generateSlug(cityConfig.name, cityConfig.country),
-      weather, // This will always be null or a valid weather object, never undefined
-      metadata: {
-        title: `Living in ${cityConfig.name}, ${cityConfig.country} - Digital Nomad Guide`,
-        description: `Comprehensive guide to living in ${cityConfig.name}, ${cityConfig.country}. Explore cost of living, weather, quality of life and more in this vibrant ${cityConfig.country} city.`,
-        keywords: [
-          cityConfig.name.toLowerCase(),
-          cityConfig.country.toLowerCase(),
-          'digital nomad',
-          'expat guide',
-          'cost of living',
-          'quality of life',
-          `${cityConfig.name.toLowerCase()} weather`,
-          `living in ${cityConfig.country.toLowerCase()}`
-        ]
-      }
+      ...rawCityData,
+      weather,
+      metadata: this.generateMetadata(rawCityData, cityConfig)
+    };
+  }
+
+  private static generateMetadata(cityData: CityData, cityConfig: any) {
+    const cityName = cityData.name;
+    const countryName = cityData.country;
+    
+    return {
+      title: `Living in ${cityName}, ${countryName} - Digital Nomad Guide`,
+      description: cityData.description || `Explore ${cityName}, ${countryName}'s vibrant city life, cost of living, and quality of life metrics.`,
+      keywords: [
+        cityName.toLowerCase(),
+        countryName.toLowerCase(),
+        'digital nomad',
+        'expat guide',
+        'cost of living',
+        'quality of life',
+        `${cityName.toLowerCase()} weather`,
+        `living in ${countryName.toLowerCase()}`
+      ]
     };
   }
 
