@@ -89,3 +89,4 @@ yarn-error.log*
 !src/data/cities.json
 !src/types/
 !pages/cities/[slug].tsx
+/cache/

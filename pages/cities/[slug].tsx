@@ -62,6 +62,10 @@ export default function CityPage({ city, error }: CityPageProps) {
       <Head>
         <title>{city.metadata.title}</title>
         <meta name="description" content={city.metadata.description} />
+        <meta name="keywords" content={city.metadata.keywords.join(', ')} />
+        <meta property="og:title" content={city.metadata.title} />
+        <meta property="og:description" content={city.metadata.description} />
+        <link rel="canonical" href={`https://uh-vibe-checker.netlify.app/cities/${city.slug}`} />
       </Head>
       <main className="max-w-4xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
@@ -221,13 +225,19 @@ export default function CityPage({ city, error }: CityPageProps) {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
+    console.log('[Build] Starting getStaticPaths for city pages...')
     const paths = await CityService.generateStaticPaths();
+    console.log(`[Build] Generated ${paths.length} city paths`)
     return {
       paths,
       fallback: true // Allow ISR for new paths
     };
   } catch (error) {
-    console.error('Error generating paths:', error);
+    console.error('[Build] Error in getStaticPaths:', error);
+    if (error instanceof Error) {
+      console.error('[Build] Error stack:', error.stack)
+      console.error('[Build] Error message:', error.message)
+    }
     return {
       paths: [],
       fallback: true
@@ -238,11 +248,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<CityPageProps> = async (context) => {
   try {
     const slug = context.params?.slug as string;
+    console.log(`[Build] Getting city data for slug: ${slug}`)
     const result = await CityService.getCityBySlug(slug);
 
     if (!result.city) {
       // If we have an error message, we'll show it on a custom error page
       if (result.error) {
+        console.log(`[Build] City not found or error: ${result.error}`)
         return {
           props: {
             error: result.error
@@ -251,20 +263,26 @@ export const getStaticProps: GetStaticProps<CityPageProps> = async (context) => 
         };
       }
       // If no error message, use 404
+      console.log(`[Build] City ${slug} not found, returning 404`)
       return { notFound: true };
     }
 
+    console.log(`[Build] Successfully loaded city: ${result.city.name}`)
     return {
-      props: { 
+      props: {
         city: result.city,
         error: null
       },
       revalidate: 3600 // Revalidate every hour for successful cases
     };
   } catch (error) {
-    console.error('Error in getStaticProps:', error);
-    return { 
-      props: { 
+    console.error('[Build] Error in city getStaticProps:', error);
+    if (error instanceof Error) {
+      console.error('[Build] Error stack:', error.stack)
+      console.error('[Build] Error message:', error.message)
+    }
+    return {
+      props: {
         error: 'An unexpected error occurred while loading the city data.'
       },
       revalidate: 60

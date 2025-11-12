@@ -7,12 +7,23 @@ import type {
   WikiTravelData
 } from '@/types/city';
 import citiesData from '@/data/cities.json';
-import { SUPPORTED_CITIES, getCityBySlug as getConfigCity } from '@/data/cities-config';
+import { SUPPORTED_CITIES } from '@/data/cities-config';
 import { WeatherAPI } from '../api/providers/weather';
 
 type RawCitiesData = Record<string, CityData>;
 
 const ITEMS_PER_PAGE = 20;
+
+// Validate data loaded correctly
+if (!citiesData || typeof citiesData !== 'object') {
+  console.error('[CityService] Failed to load cities.json - data is invalid');
+  throw new Error('Cities data failed to load');
+}
+if (!SUPPORTED_CITIES || !Array.isArray(SUPPORTED_CITIES)) {
+  console.error('[CityService] SUPPORTED_CITIES is not an array');
+  throw new Error('Cities configuration failed to load');
+}
+console.log(`[CityService] Initialized with ${Object.keys(citiesData).length} cities in JSON, ${SUPPORTED_CITIES.length} supported cities`);
 
 export class CityService {
   private static weatherAPI = new WeatherAPI();
@@ -196,16 +207,16 @@ export class CityService {
       slug, // Use the properly generated slug
       description: rawCityData.description || `Discover ${rawCityData.name}, a unique destination in ${rawCityData.country}.`,
       // Only provide defaults if the data exists but is incomplete
-      costOfLiving: rawCityData.costOfLiving 
+      costOfLiving: rawCityData.costOfLiving
         ? { ...defaultCostOfLiving, ...rawCityData.costOfLiving }
-        : null,
+        : undefined,
       qualityOfLife: rawCityData.qualityOfLife
         ? { ...defaultQualityOfLife, ...rawCityData.qualityOfLife }
-        : null,
-      weather: weather || null,
+        : undefined,
+      weather: weather || undefined,
       wikiData: rawCityData.wikiData
         ? { ...defaultWikiData, ...rawCityData.wikiData }
-        : null
+        : undefined
     };
 
     // Always generate metadata, even if other data is missing
@@ -256,9 +267,10 @@ export class CityService {
       }
 
       // Get weather data if needed
-      let weather = null;
+      let weather: WeatherData | undefined = undefined;
       try {
-        weather = await this.getWeatherData(cityData.name);
+        const weatherData = await this.getWeatherData(cityData.name);
+        weather = weatherData || undefined;
       } catch (error) {
         console.error(`Failed to fetch weather for ${cityData.name}:`, error);
       }
