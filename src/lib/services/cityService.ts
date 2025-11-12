@@ -14,6 +14,17 @@ type RawCitiesData = Record<string, CityData>;
 
 const ITEMS_PER_PAGE = 20;
 
+// Validate data loaded correctly
+if (!citiesData || typeof citiesData !== 'object') {
+  console.error('[CityService] Failed to load cities.json - data is invalid');
+  throw new Error('Cities data failed to load');
+}
+if (!SUPPORTED_CITIES || !Array.isArray(SUPPORTED_CITIES)) {
+  console.error('[CityService] SUPPORTED_CITIES is not an array');
+  throw new Error('Cities configuration failed to load');
+}
+console.log(`[CityService] Initialized with ${Object.keys(citiesData).length} cities in JSON, ${SUPPORTED_CITIES.length} supported cities`);
+
 export class CityService {
   private static weatherAPI = new WeatherAPI();
   private static weatherCache = new Map<string, { data: any; timestamp: number }>();

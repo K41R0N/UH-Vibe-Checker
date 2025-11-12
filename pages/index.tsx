@@ -123,8 +123,10 @@ export default function Home({ initialCities, totalCities, pageSize }: HomeProps
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
+    console.log('[Build] Starting getStaticProps for homepage...')
     const { cities, total } = await CityService.getCities(1, false) // Don't load weather for initial page
-    
+    console.log(`[Build] Successfully loaded ${cities.length} cities, total: ${total}`)
+
     return {
       props: {
         initialCities: cities,
@@ -134,7 +136,11 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       revalidate: 3600 // Revalidate every hour
     }
   } catch (error) {
-    console.error('Error fetching cities:', error)
+    console.error('[Build] Error in homepage getStaticProps:', error)
+    if (error instanceof Error) {
+      console.error('[Build] Error stack:', error.stack)
+      console.error('[Build] Error message:', error.message)
+    }
     return {
       props: {
         initialCities: [],
