@@ -12,20 +12,19 @@ export class WeatherAPI {
   };
 
   async getCityWeather(cityName: string): Promise<WeatherData> {
-    // Always use fallback data in development
-    if (process.env.NODE_ENV === 'development') {
-      return {
-        ...this.fallbackData,
-        condition: 'Development mode - weather data simulated'
-      };
-    }
+    // Always use fallback data in development or if no API key
+    if (process.env.NODE_ENV === 'development' || !this.apiKey) {
+      const message = process.env.NODE_ENV === 'development'
+        ? 'Development mode - weather data simulated'
+        : 'Weather data temporarily unavailable';
 
-    // In production, we expect the API key to be set in Netlify
-    if (!this.apiKey) {
-      console.warn('OpenWeather API key not found in production environment');
+      if (!this.apiKey && process.env.NODE_ENV !== 'development') {
+        console.warn('⚠️ OpenWeather API key not configured. Using fallback data.');
+      }
+
       return {
         ...this.fallbackData,
-        condition: 'Weather data temporarily unavailable'
+        condition: message
       };
     }
 

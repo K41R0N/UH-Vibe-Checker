@@ -18,6 +18,10 @@ export default function App({ Component, pageProps }: AppProps) {
           href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>"
         />
         <meta name="theme-color" content="#ffffff" />
+        <meta name="author" content="Vibe Checker" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Vibe Checker" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <Component {...pageProps} />
     </>

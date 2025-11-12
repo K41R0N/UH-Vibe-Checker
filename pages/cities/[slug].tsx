@@ -62,6 +62,10 @@ export default function CityPage({ city, error }: CityPageProps) {
       <Head>
         <title>{city.metadata.title}</title>
         <meta name="description" content={city.metadata.description} />
+        <meta name="keywords" content={city.metadata.keywords.join(', ')} />
+        <meta property="og:title" content={city.metadata.title} />
+        <meta property="og:description" content={city.metadata.description} />
+        <link rel="canonical" href={`https://uh-vibe-checker.netlify.app/cities/${city.slug}`} />
       </Head>
       <main className="max-w-4xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">

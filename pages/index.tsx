@@ -63,6 +63,12 @@ export default function Home({ initialCities, totalCities, pageSize }: HomeProps
           name="description"
           content="Explore comprehensive city guides for digital nomads. Compare cost of living, quality of life, and local insights for popular destinations worldwide."
         />
+        <meta property="og:title" content="Vibe Checker - Digital Nomad City Guides" />
+        <meta
+          property="og:description"
+          content="Explore comprehensive city guides for digital nomads. Compare cost of living, quality of life, and local insights for popular destinations worldwide."
+        />
+        <link rel="canonical" href="https://uh-vibe-checker.netlify.app/" />
       </Head>
       
       <main className="max-w-4xl mx-auto p-6">

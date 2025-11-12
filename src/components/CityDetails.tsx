@@ -1,9 +1,9 @@
-import type { CityData } from '@/types/city';
+import type { City } from '@/types/city';
 import Head from 'next/head';
 import Link from 'next/link';
 
 interface CityDetailsProps {
-  city: CityData;
+  city: City;
 }
 
 const DataUnavailableMessage = () => (
@@ -80,11 +80,11 @@ export default function CityDetails({ city }: CityDetailsProps) {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Current Weather</h2>
-          {city.currentWeather ? (
+          {city.weather ? (
             <div className="p-4 bg-gray-100 rounded">
-              <p className="font-medium">{city.currentWeather.condition}</p>
-              <p className="text-xl">{city.currentWeather.temperature}°C</p>
-              <p>Humidity: {city.currentWeather.humidity}%</p>
+              <p className="font-medium">{city.weather.condition}</p>
+              <p className="text-xl">{city.weather.temperature}°C</p>
+              <p>Humidity: {city.weather.humidity}%</p>
             </div>
           ) : <DataUnavailableMessage />}
         </section>

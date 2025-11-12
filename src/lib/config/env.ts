@@ -1,15 +1,26 @@
 export function validateEnv() {
+  // In development, we allow missing env vars as we use fallback data
+  if (process.env.NODE_ENV === 'development') {
+    if (!process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY) {
+      console.warn('⚠️ NEXT_PUBLIC_OPENWEATHER_API_KEY not set. Using fallback weather data.');
+    }
+    return true;
+  }
+
+  // In production, log warnings but don't fail - weather will gracefully degrade
   const requiredEnvVars = [
     'NEXT_PUBLIC_OPENWEATHER_API_KEY'
   ];
 
+  let hasAllVars = true;
   for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
-      console.error(`Missing required environment variable: ${envVar}`);
-      return false;
+      console.warn(`⚠️ Missing environment variable: ${envVar}. Some features may be limited.`);
+      hasAllVars = false;
     }
   }
-  return true;
+
+  return hasAllVars;
 }
 
 export const config = {
