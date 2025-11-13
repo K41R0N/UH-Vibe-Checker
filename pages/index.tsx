@@ -7,6 +7,7 @@ import {
   generateHomepageStructuredData,
   stringifyStructuredData,
 } from '@/lib/seo/structuredData';
+import { siteConfig } from '@/lib/config/site';
 import {
   Hero,
   HeroTitle,
@@ -72,7 +73,7 @@ export default function Home({ initialCities, totalCities, pageSize }: HomeProps
           property="og:description"
           content="Explore comprehensive city guides for digital nomads and travelers. Compare cost of living, quality of life, and local insights for destinations worldwide."
         />
-        <link rel="canonical" href="https://uh-vibe-checker.netlify.app/" />
+        <link rel="canonical" href={siteConfig.url} />
 
         {/* Structured Data - JSON-LD for SEO */}
         <script

@@ -29,17 +29,26 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     const urls = generateCitySitemapUrls(cities);
 
     // Check if we need to split into multiple sitemaps
-    // (we probably won't with 370 cities, but this is future-proof)
     const chunks = splitSitemap(urls);
 
     if (chunks.length > 1) {
-      console.warn(
-        `[Sitemap] Generated ${chunks.length} sitemap chunks. Consider creating separate sitemap files.`
+      console.error(
+        `[Sitemap] ERROR: Generated ${chunks.length} sitemap chunks (${urls.length} URLs). ` +
+        `This exceeds the single sitemap limit. Please implement multi-file sitemap support.`
       );
+      // Fail fast - don't serve partial data
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'text/plain');
+      res.write(
+        `Error: Too many URLs (${urls.length}) for single sitemap. ` +
+        `Maximum is 50,000. Please implement sitemap index.`
+      );
+      res.end();
+      return { props: {} };
     }
 
-    // Generate the sitemap XML (use first chunk if split)
-    const sitemap = generateSitemap(chunks[0] || urls);
+    // Generate the sitemap XML
+    const sitemap = generateSitemap(urls);
 
     // Set headers for XML response
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');

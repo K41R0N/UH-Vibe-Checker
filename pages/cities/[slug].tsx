@@ -10,6 +10,7 @@ import {
   stringifyStructuredData,
 } from '@/lib/seo/structuredData';
 import { findSimilarCities, SimilarityScore } from '@/lib/seo/internalLinking';
+import { getEntityUrl, getAbsoluteUrl } from '@/lib/config/site';
 import {
   Section,
   SectionHeader,
@@ -86,7 +87,7 @@ export default function CityPage({ city, similarCities = [], error }: CityPagePr
         <meta name="keywords" content={city.metadata.keywords.join(', ')} />
         <meta property="og:title" content={city.metadata.title} />
         <meta property="og:description" content={city.metadata.description} />
-        <link rel="canonical" href={`https://uh-vibe-checker.netlify.app/cities/${city.slug}`} />
+        <link rel="canonical" href={getAbsoluteUrl(getEntityUrl(city.slug))} />
 
         {/* Structured Data - JSON-LD for SEO */}
         <script

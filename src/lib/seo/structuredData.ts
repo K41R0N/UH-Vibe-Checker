@@ -9,12 +9,13 @@
  */
 
 import type { City } from '@/types/city';
+import { siteConfig } from '../config/site';
 
 /**
- * Base URL for the site (used in structured data URLs)
+ * Get site URL and name from config
  */
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vibe-checker.netlify.app';
-const SITE_NAME = 'Vibe Checker';
+const SITE_URL = siteConfig.url;
+const SITE_NAME = siteConfig.name;
 
 /**
  * Breadcrumb item for navigation
