@@ -9,9 +9,11 @@ import {
   generateFAQSchema,
   stringifyStructuredData,
 } from '@/lib/seo/structuredData';
+import { findSimilarCities, SimilarityScore } from '@/lib/seo/internalLinking';
 
 interface CityPageProps {
   city?: City;
+  similarCities?: SimilarityScore[];
   error?: string | null;
 }
 
@@ -22,7 +24,7 @@ const DataUnavailableMessage = () => (
   </div>
 );
 
-export default function CityPage({ city, error }: CityPageProps) {
+export default function CityPage({ city, similarCities = [], error }: CityPageProps) {
   if (error) {
     return (
       <>
@@ -243,6 +245,42 @@ export default function CityPage({ city, error }: CityPageProps) {
             )}
           </>
         )}
+
+        {/* Similar Cities Section - Internal Linking for SEO */}
+        {similarCities && similarCities.length > 0 && (
+          <section className="mt-12 pt-8 border-t border-gray-200">
+            <h2 className="text-2xl font-semibold mb-4">Similar Cities</h2>
+            <p className="text-gray-600 mb-6">
+              Explore these cities that share similar characteristics with {city.name}
+            </p>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {similarCities.map((similar) => (
+                <Link
+                  key={similar.city.slug}
+                  href={`/cities/${similar.city.slug}`}
+                  className="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
+                >
+                  <h3 className="text-lg font-semibold mb-2">
+                    {similar.city.name}, {similar.city.country}
+                  </h3>
+                  {similar.reasons.length > 0 && (
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      {similar.reasons.slice(0, 2).map((reason, idx) => (
+                        <li key={idx} className="flex items-center">
+                          <span className="mr-2">•</span>
+                          {reason}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="mt-3 text-blue-600 text-sm font-medium">
+                    Compare cities →
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
     </>
   );
@@ -292,10 +330,18 @@ export const getStaticProps: GetStaticProps<CityPageProps> = async (context) => 
       return { notFound: true };
     }
 
-    console.log(`[Build] Successfully loaded city: ${result.city.name}`)
+    // Find similar cities for internal linking
+    const allCities = await CityService.getAllCities(false);
+    const similarCities = findSimilarCities(result.city, allCities, {
+      limit: 6,
+      minScore: 0.3,
+    });
+
+    console.log(`[Build] Successfully loaded city: ${result.city.name}, found ${similarCities.length} similar cities`)
     return {
       props: {
         city: result.city,
+        similarCities,
         error: null
       },
       revalidate: 3600 // Revalidate every hour for successful cases
