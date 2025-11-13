@@ -3,6 +3,12 @@ import { City } from '@/types/city';
 import { CityService } from '@/lib/services/cityService';
 import Head from 'next/head';
 import Link from 'next/link';
+import {
+  generateCityPageStructuredData,
+  generateDefaultCityFAQs,
+  generateFAQSchema,
+  stringifyStructuredData,
+} from '@/lib/seo/structuredData';
 
 interface CityPageProps {
   city?: City;
@@ -57,6 +63,11 @@ export default function CityPage({ city, error }: CityPageProps) {
     );
   }
 
+  // Generate structured data for SEO
+  const structuredData = generateCityPageStructuredData(city);
+  const cityFAQs = generateDefaultCityFAQs(city);
+  const faqSchema = generateFAQSchema(cityFAQs);
+
   return (
     <>
       <Head>
@@ -66,6 +77,20 @@ export default function CityPage({ city, error }: CityPageProps) {
         <meta property="og:title" content={city.metadata.title} />
         <meta property="og:description" content={city.metadata.description} />
         <link rel="canonical" href={`https://uh-vibe-checker.netlify.app/cities/${city.slug}`} />
+
+        {/* Structured Data - JSON-LD for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: stringifyStructuredData(structuredData),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: stringifyStructuredData(faqSchema),
+          }}
+        />
       </Head>
       <main className="max-w-4xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">

@@ -253,6 +253,25 @@ export class CityService {
     }
   }
 
+  /**
+   * Get all cities without pagination (useful for sitemap generation)
+   */
+  static async getAllCities(loadWeather = false): Promise<City[]> {
+    try {
+      const cities = await Promise.all(
+        SUPPORTED_CITIES.map(config => this.createCityObject(config, loadWeather))
+      );
+
+      const validCities = cities.filter((city): city is City => city !== null);
+      console.log(`[CityService] Loaded all ${validCities.length} cities`);
+
+      return validCities;
+    } catch (error) {
+      console.error('[CityService] Error fetching all cities:', error);
+      return [];
+    }
+  }
+
   static async getCityBySlug(slug: string): Promise<{ city: City | null; error?: string }> {
     try {
       // Find the city in our data using just the name-based slug

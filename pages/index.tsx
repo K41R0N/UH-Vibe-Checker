@@ -4,6 +4,10 @@ import { GetStaticProps } from 'next'
 import { City } from '@/types/city'
 import { CityService } from '@/lib/services/cityService'
 import Head from 'next/head'
+import {
+  generateHomepageStructuredData,
+  stringifyStructuredData,
+} from '@/lib/seo/structuredData'
 
 // Configuration
 export const ITEMS_PER_PAGE = 20;
@@ -55,6 +59,9 @@ export default function Home({ initialCities, totalCities, pageSize }: HomeProps
     }
   }
 
+  // Generate structured data for SEO
+  const structuredData = generateHomepageStructuredData(cities, totalCities);
+
   return (
     <>
       <Head>
@@ -69,6 +76,14 @@ export default function Home({ initialCities, totalCities, pageSize }: HomeProps
           content="Explore comprehensive city guides for digital nomads. Compare cost of living, quality of life, and local insights for popular destinations worldwide."
         />
         <link rel="canonical" href="https://uh-vibe-checker.netlify.app/" />
+
+        {/* Structured Data - JSON-LD for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: stringifyStructuredData(structuredData),
+          }}
+        />
       </Head>
       
       <main className="max-w-4xl mx-auto p-6">
