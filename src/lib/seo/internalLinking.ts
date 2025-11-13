@@ -82,6 +82,7 @@ function calculateCostOfLivingSimilarity(
 
   const categories = ['housing', 'food', 'transportation', 'utilities'] as const;
   let totalDifference = 0;
+  let contributorsCount = 0;
 
   for (const category of categories) {
     const val1 = cost1[category];
@@ -93,12 +94,16 @@ function calculateCostOfLivingSimilarity(
       if (maxVal > 0) {
         const difference = Math.abs(val1 - val2) / maxVal;
         totalDifference += difference;
+        contributorsCount++;
       }
     }
   }
 
-  // Average difference across categories
-  const avgDifference = totalDifference / categories.length;
+  // Return 0 if no categories contributed
+  if (contributorsCount === 0) return 0;
+
+  // Average difference across contributing categories only
+  const avgDifference = totalDifference / contributorsCount;
 
   // Convert to similarity (1 - difference)
   return 1 - Math.min(avgDifference, 1);
@@ -116,6 +121,7 @@ function calculateQualityOfLifeSimilarity(
 
   const categories = ['safety', 'healthcare'] as const;
   let totalDifference = 0;
+  let contributorsCount = 0;
 
   for (const category of categories) {
     const val1 = qol1[category];
@@ -125,11 +131,15 @@ function calculateQualityOfLifeSimilarity(
       // Scores are out of 10, so normalize
       const difference = Math.abs(val1 - val2) / 10;
       totalDifference += difference;
+      contributorsCount++;
     }
   }
 
-  // Average difference across categories
-  const avgDifference = totalDifference / categories.length;
+  // Return 0 if no categories contributed
+  if (contributorsCount === 0) return 0;
+
+  // Average difference across contributing categories only
+  const avgDifference = totalDifference / contributorsCount;
 
   // Convert to similarity (1 - difference)
   return 1 - Math.min(avgDifference, 1);

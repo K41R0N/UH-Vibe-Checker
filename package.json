@@ -16,7 +16,7 @@
     "clean": "rimraf .next out node_modules",
     "enrich": "ts-node --project tsconfig.scripts.json scripts/enrich-cities.ts",
     "enrich:test": "ts-node --project tsconfig.scripts.json scripts/enrich-cities.ts --limit 5 --verbose --dry-run",
-    "enrich:city": "ts-node --project tsconfig.scripts.json scripts/enrich-cities.ts --city"
+    "enrich:city": "ts-node --project tsconfig.scripts.json scripts/enrich-cities.ts"
   },
   "dependencies": {
     "@types/node": "20.17.16",

@@ -142,13 +142,14 @@ export class DataEnricher<TInput = any, TOutput = any> {
       };
     }
 
-    console.log(`[DataEnricher] Enriching with ${capableProviders.length} providers`);
+    console.log(`[DataEnricher] Enriching with ${capableProviders.length} providers (max concurrency: ${this.config.maxConcurrency})`);
 
     // Enrich with each provider
     if (this.config.parallel) {
-      // Parallel execution
-      const results = await Promise.all(
-        capableProviders.map(provider => this.enrichWithProvider(provider, baseData))
+      // Parallel execution with bounded concurrency
+      const results = await this.executeWithConcurrencyLimit(
+        capableProviders.map(provider => () => this.enrichWithProvider(provider, baseData)),
+        this.config.maxConcurrency
       );
 
       for (let i = 0; i < results.length; i++) {
@@ -218,6 +219,40 @@ export class DataEnricher<TInput = any, TOutput = any> {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
+
+    return results;
+  }
+
+  /**
+   * Execute tasks with bounded concurrency
+   */
+  private async executeWithConcurrencyLimit<T>(
+    tasks: Array<() => Promise<T>>,
+    limit: number
+  ): Promise<T[]> {
+    const results: T[] = [];
+    const executing: Promise<void>[] = [];
+
+    for (const task of tasks) {
+      // Start the task
+      const promise = task().then(result => {
+        results.push(result);
+      });
+
+      // Add to executing queue
+      const executing_promise = promise.then(() => {
+        executing.splice(executing.indexOf(executing_promise), 1);
+      });
+      executing.push(executing_promise);
+
+      // Wait if we've reached the concurrency limit
+      if (executing.length >= limit) {
+        await Promise.race(executing);
+      }
+    }
+
+    // Wait for all remaining tasks to complete
+    await Promise.all(executing);
 
     return results;
   }
