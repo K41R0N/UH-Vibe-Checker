@@ -33,6 +33,9 @@ export class CityService {
   private static lastApiCallReset = new Date().setHours(0, 0, 0, 0);
   private static MAX_API_CALLS_PER_DAY = 950; // Setting slightly below 1000 for safety
 
+  // Build-time cache to prevent O(n²) during static site generation
+  private static allCitiesCache: City[] | null = null;
+
   private static generateSlug(name: string, country: string): string {
     if (!name || !country) {
       throw new Error(`Invalid city data: name=${name}, country=${country}`);
@@ -254,18 +257,40 @@ export class CityService {
   }
 
   /**
-   * Get all cities without pagination (useful for sitemap generation)
+   * Get all cities without pagination (useful for sitemap generation and similarity calculations)
+   * Uses build-time cache to prevent O(n²) performance during static site generation
    */
   static async getAllCities(loadWeather = false): Promise<City[]> {
     try {
-      const cities = await Promise.all(
-        SUPPORTED_CITIES.map(config => this.createCityObject(config, loadWeather))
-      );
+      // Return cached cities if available (and weather not requested)
+      if (!loadWeather && this.allCitiesCache !== null) {
+        console.log(`[CityService] Returning ${this.allCitiesCache.length} cities from cache`);
+        return this.allCitiesCache;
+      }
 
-      const validCities = cities.filter((city): city is City => city !== null);
-      console.log(`[CityService] Loaded all ${validCities.length} cities`);
+      // Load cities page by page to respect API quotas
+      const allCities: City[] = [];
+      const totalPages = Math.ceil(SUPPORTED_CITIES.length / ITEMS_PER_PAGE);
 
-      return validCities;
+      for (let page = 1; page <= totalPages; page++) {
+        const { cities } = await this.getCities(page, loadWeather);
+        allCities.push(...cities);
+
+        // Stop if we hit weather API quota
+        if (loadWeather && this.apiCallsToday >= this.MAX_API_CALLS_PER_DAY) {
+          console.warn('[CityService] Weather quota reached while loading all cities');
+          break;
+        }
+      }
+
+      console.log(`[CityService] Loaded all ${allCities.length} cities`);
+
+      // Cache the results if weather wasn't loaded (for build-time reuse)
+      if (!loadWeather) {
+        this.allCitiesCache = allCities;
+      }
+
+      return allCities;
     } catch (error) {
       console.error('[CityService] Error fetching all cities:', error);
       return [];

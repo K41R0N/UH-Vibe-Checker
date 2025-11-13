@@ -3,17 +3,14 @@
  *
  * This module generates XML sitemaps for SEO.
  * Supports sitemap index and multiple sitemap files.
+ * Fully configurable for different domains and page structures.
  *
  * @see https://www.sitemaps.org/protocol.html
  * @see https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap
  */
 
+import { siteConfig } from '../config/site';
 import type { City } from '@/types/city';
-
-/**
- * Base URL for the site
- */
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vibe-checker.netlify.app';
 
 /**
  * Sitemap URL entry
@@ -104,16 +101,20 @@ export function generateSitemapIndex(sitemaps: SitemapIndexEntry[]): string {
 }
 
 /**
- * Generate sitemap URLs for city pages
+ * Generate sitemap URLs for entity pages (cities, products, etc.)
  */
-export function generateCitySitemapUrls(cities: City[]): SitemapURL[] {
+export function generateEntitySitemapUrls(entities: City[]): SitemapURL[] {
   const now = new Date().toISOString();
+  const { url } = siteConfig;
+  const { entityPath } = siteConfig.structure;
+  const priority = siteConfig.structure.sitemap.priorities.entity;
+  const changefreq = siteConfig.structure.sitemap.defaultChangeFreq;
 
-  return cities.map((city) => ({
-    loc: `${SITE_URL}/cities/${city.slug}`,
+  return entities.map((entity) => ({
+    loc: `${url}${entityPath}/${entity.slug}`,
     lastmod: now,
-    changefreq: 'weekly' as const,
-    priority: 0.8,
+    changefreq,
+    priority,
   }));
 }
 
@@ -122,17 +123,19 @@ export function generateCitySitemapUrls(cities: City[]): SitemapURL[] {
  */
 export function generateStaticSitemapUrls(): SitemapURL[] {
   const now = new Date().toISOString();
+  const { url } = siteConfig;
+  const homepagePriority = siteConfig.structure.sitemap.priorities.homepage;
 
   return [
     {
-      loc: SITE_URL,
+      loc: url,
       lastmod: now,
       changefreq: 'daily' as const,
-      priority: 1.0,
+      priority: homepagePriority,
     },
     // Add more static pages here as they're created
     // {
-    //   loc: `${SITE_URL}/about`,
+    //   loc: `${url}/about`,
     //   lastmod: now,
     //   changefreq: 'monthly',
     //   priority: 0.5,
@@ -144,11 +147,12 @@ export function generateStaticSitemapUrls(): SitemapURL[] {
  * Split URLs into multiple sitemaps if needed
  * (Google recommends max 50,000 URLs per sitemap)
  */
-export function splitSitemap(urls: SitemapURL[], maxPerSitemap = 50000): SitemapURL[][] {
+export function splitSitemap(urls: SitemapURL[], maxPerSitemap?: number): SitemapURL[][] {
+  const limit = maxPerSitemap || siteConfig.structure.sitemap.maxUrlsPerFile;
   const chunks: SitemapURL[][] = [];
 
-  for (let i = 0; i < urls.length; i += maxPerSitemap) {
-    chunks.push(urls.slice(i, i + maxPerSitemap));
+  for (let i = 0; i < urls.length; i += limit) {
+    chunks.push(urls.slice(i, i + limit));
   }
 
   return chunks;
@@ -159,4 +163,12 @@ export function splitSitemap(urls: SitemapURL[], maxPerSitemap = 50000): Sitemap
  */
 export function getCurrentTimestamp(): string {
   return new Date().toISOString();
+}
+
+/**
+ * Backward compatibility - keep old function name
+ * @deprecated Use generateEntitySitemapUrls instead
+ */
+export function generateCitySitemapUrls(cities: City[]): SitemapURL[] {
+  return generateEntitySitemapUrls(cities);
 }

@@ -1,12 +1,12 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Import Space Grotesk font from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 /* Import Playfair Display as Yellix alternative (elegant serif) */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Base Styles */
 @layer base {
@@ -66,22 +66,22 @@
   }
 
   .section-padding-lg {
-    @apply py-20 md:py-32 lg:py-42;
+    @apply py-20 md:py-32 lg:py-40;
   }
 
   /* Card Base */
   .card {
-    @apply bg-cream-50 border border-black-100 rounded-none transition-all duration-300;
+    @apply bg-cream-50 border border-black-100 rounded-none transition-all duration-200;
   }
 
   .card-hover {
-    @apply hover:shadow-2xl hover:border-black-300 hover:-translate-y-1;
+    @apply hover:shadow-elegant-lg hover:border-black-300 hover:-translate-y-0.5;
   }
 
   /* Button Base */
   .btn {
     @apply inline-flex items-center justify-center px-8 py-4 font-sans font-medium text-body-md
-           transition-all duration-300 ease-out-expo rounded-none;
+           transition-all duration-200 ease-out-expo rounded-none;
   }
 
   .btn-primary {
@@ -100,7 +100,7 @@
   .link-underline {
     @apply relative inline-block after:absolute after:bottom-0 after:left-0 after:h-px after:w-full
            after:bg-current after:origin-bottom-left after:scale-x-100 after:transition-transform
-           after:duration-300 after:ease-out-expo hover:after:scale-x-0;
+           after:duration-200 after:ease-out-expo hover:after:scale-x-0;
   }
 
   /* Badge */

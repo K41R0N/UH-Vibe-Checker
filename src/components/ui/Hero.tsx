@@ -11,7 +11,7 @@ interface HeroProps {
 const sizeClasses = {
   sm: 'min-h-[40vh] py-16 md:py-24',
   md: 'min-h-[60vh] py-20 md:py-32',
-  lg: 'min-h-[80vh] py-24 md:py-42',
+  lg: 'min-h-[80vh] py-24 md:py-40',
 };
 
 export function Hero({
