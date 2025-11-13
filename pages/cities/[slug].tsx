@@ -17,8 +17,6 @@ import {
   SectionTitle,
   Card,
   CardTitle,
-  DataGrid,
-  DataItem,
   Badge,
   Button,
 } from '@/components/ui';
@@ -184,11 +182,11 @@ export default function CityPage({ city, similarCities = [], error }: CityPagePr
             {/* Cost Breakdown Cards */}
             <div className="space-y-6">
               {[
-                { label: 'Housing', value: city.costOfLiving.housing, icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', max: 3000 },
-                { label: 'Food', value: city.costOfLiving.food, icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z', max: 1000 },
-                { label: 'Transportation', value: city.costOfLiving.transportation, icon: 'M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2', max: 500 },
-                { label: 'Utilities', value: city.costOfLiving.utilities, icon: 'M13 10V3L4 14h7v7l9-11h-7z', max: 300 },
-              ].map((item, idx) => (
+                { label: 'Housing', value: city.costOfLiving.housing || 0, icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', max: 3000 },
+                { label: 'Food', value: city.costOfLiving.food || 0, icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z', max: 1000 },
+                { label: 'Transportation', value: city.costOfLiving.transportation || 0, icon: 'M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2', max: 500 },
+                { label: 'Utilities', value: city.costOfLiving.utilities || 0, icon: 'M13 10V3L4 14h7v7l9-11h-7z', max: 300 },
+              ].filter(item => item.value > 0).map((item, idx) => (
                 <div key={idx} className="bg-cream-50 border border-black-100 p-6 hover:border-black-300 transition-all">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -217,25 +215,33 @@ export default function CityPage({ city, similarCities = [], error }: CityPagePr
               <div className="bg-black text-white p-8 mb-6 sticky top-24">
                 <h3 className="text-heading-lg font-display font-bold mb-6">Monthly Total</h3>
                 <div className="text-display-lg font-display font-bold mb-8">
-                  ${(city.costOfLiving.housing + city.costOfLiving.food + city.costOfLiving.transportation + city.costOfLiving.utilities).toLocaleString()}
+                  ${((city.costOfLiving.housing || 0) + (city.costOfLiving.food || 0) + (city.costOfLiving.transportation || 0) + (city.costOfLiving.utilities || 0)).toLocaleString()}
                 </div>
                 <div className="space-y-3 text-body-sm opacity-90">
-                  <div className="flex justify-between pb-2 border-b border-white/20">
-                    <span>Housing</span>
-                    <span className="font-medium">${city.costOfLiving.housing}</span>
-                  </div>
-                  <div className="flex justify-between pb-2 border-b border-white/20">
-                    <span>Food</span>
-                    <span className="font-medium">${city.costOfLiving.food}</span>
-                  </div>
-                  <div className="flex justify-between pb-2 border-b border-white/20">
-                    <span>Transportation</span>
-                    <span className="font-medium">${city.costOfLiving.transportation}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Utilities</span>
-                    <span className="font-medium">${city.costOfLiving.utilities}</span>
-                  </div>
+                  {city.costOfLiving.housing && (
+                    <div className="flex justify-between pb-2 border-b border-white/20">
+                      <span>Housing</span>
+                      <span className="font-medium">${city.costOfLiving.housing}</span>
+                    </div>
+                  )}
+                  {city.costOfLiving.food && (
+                    <div className="flex justify-between pb-2 border-b border-white/20">
+                      <span>Food</span>
+                      <span className="font-medium">${city.costOfLiving.food}</span>
+                    </div>
+                  )}
+                  {city.costOfLiving.transportation && (
+                    <div className="flex justify-between pb-2 border-b border-white/20">
+                      <span>Transportation</span>
+                      <span className="font-medium">${city.costOfLiving.transportation}</span>
+                    </div>
+                  )}
+                  {city.costOfLiving.utilities && (
+                    <div className="flex justify-between">
+                      <span>Utilities</span>
+                      <span className="font-medium">${city.costOfLiving.utilities}</span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-body-xs opacity-75 mt-6 leading-relaxed">
                   * Estimates based on average costs for a single person. Actual expenses may vary based on lifestyle and location within the city.

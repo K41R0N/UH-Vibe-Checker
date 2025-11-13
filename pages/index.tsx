@@ -87,14 +87,15 @@ export default function Home({ initialCities, totalCities, pageSize }: HomeProps
   const stats = useMemo(() => {
     const withCostData = cities.filter(c => c.costOfLiving).length;
     const withWeatherData = cities.filter(c => c.weather).length;
-    const avgHousing = cities
-      .filter(c => c.costOfLiving?.housing)
-      .reduce((sum, c) => sum + (c.costOfLiving?.housing || 0), 0) / (withCostData || 1);
+    const citiesWithHousing = cities.filter(c => c.costOfLiving?.housing);
+    const avgHousing = citiesWithHousing.length > 0
+      ? citiesWithHousing.reduce((sum, c) => sum + (c.costOfLiving?.housing || 0), 0) / citiesWithHousing.length
+      : 0;
 
     return [
       { label: 'Cities Worldwide', value: totalCities },
       { label: 'Countries Covered', value: regions.length },
-      { label: 'Avg. Housing Cost', value: `$${Math.round(avgHousing)}/mo` },
+      { label: 'Avg. Housing Cost', value: avgHousing > 0 ? `$${Math.round(avgHousing)}/mo` : 'N/A' },
       { label: 'Data Points', value: `${withCostData + withWeatherData}+` },
     ];
   }, [cities, totalCities, regions.length]);
