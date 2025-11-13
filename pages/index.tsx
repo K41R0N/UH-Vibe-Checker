@@ -22,7 +22,6 @@ import {
   Button,
   Badge,
   StatsGrid,
-  DataItem,
 } from '@/components/ui';
 
 // Configuration
@@ -363,7 +362,7 @@ export default function Home({ initialCities, totalCities, pageSize }: HomeProps
           <>
             {/* Cities Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-              {filteredCities.map((city, index) => (
+              {filteredCities.map((city) => (
                 <Card
                   key={city.id || `${city.name}-${city.country}`.toLowerCase()}
                   href={`/cities/${city.slug}`}

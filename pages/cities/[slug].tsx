@@ -141,25 +141,25 @@ export default function CityPage({ city, similarCities = [], error }: CityPagePr
                 {city.costOfLiving?.housing && (
                   <div className="flex items-center justify-between pb-3 border-b border-black-100">
                     <span className="text-body-sm text-black-600">Housing</span>
-                    <span className="text-body-lg font-bold">${city.costOfLiving.housing}/mo</span>
+                    <span className="text-body-lg font-bold">${city.costOfLiving?.housing}/mo</span>
                   </div>
                 )}
-                {city.weather && (
+                {city.weather?.temperature && (
                   <div className="flex items-center justify-between pb-3 border-b border-black-100">
                     <span className="text-body-sm text-black-600">Temperature</span>
-                    <span className="text-body-lg font-bold">{city.weather.temperature}°C</span>
+                    <span className="text-body-lg font-bold">{city.weather?.temperature}°C</span>
                   </div>
                 )}
                 {city.qualityOfLife?.safety && (
                   <div className="flex items-center justify-between pb-3 border-b border-black-100">
                     <span className="text-body-sm text-black-600">Safety Score</span>
-                    <span className="text-body-lg font-bold">{city.qualityOfLife.safety}/10</span>
+                    <span className="text-body-lg font-bold">{city.qualityOfLife?.safety}/10</span>
                   </div>
                 )}
                 {city.qualityOfLife?.healthcare && (
                   <div className="flex items-center justify-between">
                     <span className="text-body-sm text-black-600">Healthcare</span>
-                    <span className="text-body-lg font-bold">{city.qualityOfLife.healthcare}/10</span>
+                    <span className="text-body-lg font-bold">{city.qualityOfLife?.healthcare}/10</span>
                   </div>
                 )}
               </div>
@@ -276,21 +276,24 @@ export default function CityPage({ city, similarCities = [], error }: CityPagePr
                 <h3 className="text-heading-sm font-display font-bold">Safety</h3>
               </div>
               <div className="text-display-md font-display font-bold mb-4">
-                {city.qualityOfLife.safety}/10
+                {city.qualityOfLife?.safety ?? 0}/10
               </div>
               {/* Visual Rating */}
               <div className="flex gap-1 mb-4">
-                {[...Array(10)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-2 flex-1 ${i < city.qualityOfLife.safety ? 'bg-black' : 'bg-black-100'}`}
-                  />
-                ))}
+                {[...Array(10)].map((_, i) => {
+                  const safetyScore = city.qualityOfLife?.safety ?? 0;
+                  return (
+                    <div
+                      key={i}
+                      className={`h-2 flex-1 ${i < safetyScore ? 'bg-black' : 'bg-black-100'}`}
+                    />
+                  );
+                })}
               </div>
               <p className="text-body-sm text-black-600">
-                {city.qualityOfLife.safety >= 8 ? 'Excellent safety record' :
-                 city.qualityOfLife.safety >= 6 ? 'Good overall safety' :
-                 city.qualityOfLife.safety >= 4 ? 'Moderate safety levels' :
+                {(city.qualityOfLife?.safety ?? 0) >= 8 ? 'Excellent safety record' :
+                 (city.qualityOfLife?.safety ?? 0) >= 6 ? 'Good overall safety' :
+                 (city.qualityOfLife?.safety ?? 0) >= 4 ? 'Moderate safety levels' :
                  'Exercise caution'}
               </p>
             </div>
@@ -306,21 +309,24 @@ export default function CityPage({ city, similarCities = [], error }: CityPagePr
                 <h3 className="text-heading-sm font-display font-bold">Healthcare</h3>
               </div>
               <div className="text-display-md font-display font-bold mb-4">
-                {city.qualityOfLife.healthcare}/10
+                {city.qualityOfLife?.healthcare ?? 0}/10
               </div>
               {/* Visual Rating */}
               <div className="flex gap-1 mb-4">
-                {[...Array(10)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-2 flex-1 ${i < city.qualityOfLife.healthcare ? 'bg-black' : 'bg-black-100'}`}
-                  />
-                ))}
+                {[...Array(10)].map((_, i) => {
+                  const healthcareScore = city.qualityOfLife?.healthcare ?? 0;
+                  return (
+                    <div
+                      key={i}
+                      className={`h-2 flex-1 ${i < healthcareScore ? 'bg-black' : 'bg-black-100'}`}
+                    />
+                  );
+                })}
               </div>
               <p className="text-body-sm text-black-600">
-                {city.qualityOfLife.healthcare >= 8 ? 'World-class healthcare' :
-                 city.qualityOfLife.healthcare >= 6 ? 'Quality medical care' :
-                 city.qualityOfLife.healthcare >= 4 ? 'Adequate healthcare' :
+                {(city.qualityOfLife?.healthcare ?? 0) >= 8 ? 'World-class healthcare' :
+                 (city.qualityOfLife?.healthcare ?? 0) >= 6 ? 'Quality medical care' :
+                 (city.qualityOfLife?.healthcare ?? 0) >= 4 ? 'Adequate healthcare' :
                  'Basic medical services'}
               </p>
             </div>
@@ -336,21 +342,21 @@ export default function CityPage({ city, similarCities = [], error }: CityPagePr
                 <h3 className="text-heading-sm font-display font-bold">Climate</h3>
               </div>
               <div className="text-heading-lg font-display font-bold mb-6">
-                {city.qualityOfLife.climate}
+                {city.qualityOfLife?.climate ?? 'N/A'}
               </div>
               {city.weather && (
                 <div className="space-y-3 text-body-sm">
                   <div className="flex justify-between pb-2 border-b border-black-100">
                     <span className="text-black-600">Current Temp</span>
-                    <span className="font-medium">{city.weather.temperature}°C</span>
+                    <span className="font-medium">{city.weather?.temperature}°C</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-black-100">
                     <span className="text-black-600">Condition</span>
-                    <span className="font-medium">{city.weather.condition}</span>
+                    <span className="font-medium">{city.weather?.condition}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-black-600">Humidity</span>
-                    <span className="font-medium">{city.weather.humidity}%</span>
+                    <span className="font-medium">{city.weather?.humidity}%</span>
                   </div>
                 </div>
               )}
@@ -563,7 +569,7 @@ export default function CityPage({ city, similarCities = [], error }: CityPagePr
                 {similar.city.costOfLiving?.housing && (
                   <div className="flex items-center justify-between text-body-sm mb-4 pb-4 border-b border-black-100">
                     <span className="text-black-500">Housing</span>
-                    <span className="font-medium">${similar.city.costOfLiving.housing}/mo</span>
+                    <span className="font-medium">${similar.city.costOfLiving?.housing}/mo</span>
                   </div>
                 )}
 
