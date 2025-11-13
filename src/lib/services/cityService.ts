@@ -202,6 +202,7 @@ export class CityService {
     };
 
     // Enrich and validate the raw data with proper type checking
+    // Note: Using null instead of undefined for JSON serialization in Next.js
     const enrichedData: CityData = {
       ...rawCityData,
       slug, // Use the properly generated slug
@@ -213,7 +214,7 @@ export class CityService {
       qualityOfLife: rawCityData.qualityOfLife
         ? { ...defaultQualityOfLife, ...rawCityData.qualityOfLife }
         : undefined,
-      weather: weather || undefined,
+      weather: weather ?? null, // null is JSON-serializable, undefined is not
       wikiData: rawCityData.wikiData
         ? { ...defaultWikiData, ...rawCityData.wikiData }
         : undefined
@@ -267,10 +268,10 @@ export class CityService {
       }
 
       // Get weather data if needed
-      let weather: WeatherData | undefined = undefined;
+      let weather: WeatherData | null = null;
       try {
         const weatherData = await this.getWeatherData(cityData.name);
-        weather = weatherData || undefined;
+        weather = weatherData ?? null; // Ensure null, not undefined
       } catch (error) {
         console.error(`Failed to fetch weather for ${cityData.name}:`, error);
       }

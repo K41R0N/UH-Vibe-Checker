@@ -77,7 +77,7 @@ export interface CityData {
   description: string;
   costOfLiving?: CostOfLivingData;
   qualityOfLife?: QualityOfLifeData;
-  weather?: WeatherData;
+  weather?: WeatherData | null; // Can be null for JSON serialization
   wikiData?: WikiTravelData;
   lastUpdated?: {
     weather: string;    // ISO date string
